@@ -274,22 +274,24 @@
 
             async save() {
                 document.getElementById('sync-status').innerText = "☁️ Salvando...";
-                try {
-                    await fetch(`${SUPABASE_URL}/rest/v1/dados_eletivas`, {
-                        method: 'POST',
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'resolution=merge-upsert' // ISSO AQUI É O QUE FAZ O SALVAMENTO FUNCIONAR
-                        },
-                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
-                    });
-                    document.getElementById('sync-status').innerText = "✅ Salvo";
-                } catch (e) {
-                    console.error("Erro ao salvar:", e);
-                    alert("Erro ao salvar no banco de dados!");
-                }
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/dados_eletivas`, {
+        method: 'POST',
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-upsert', // Isso força o salvamento por cima do antigo
+            'Content-Profile': 'public'
+        },
+        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
+    });
+
+    if (response.ok) {
+        document.getElementById('sync-status').innerText = "✅ Salvo com Sucesso!";
+    } else {
+        document.getElementById('sync-status').innerText = "❌ Erro ao gravar";
+        console.error(await response.json());
+    }
             }
         };
 
@@ -467,4 +469,5 @@
     </script>
 </body>
 </html>
+
 
