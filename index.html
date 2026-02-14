@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELETIVAS 2026 | EEMTI ACM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #064e3b; --primary-light: #10b981; --secondary: #0f172a;
+            --accent: #34d399; --danger: #e11d48; --bg: #f8fafc;
+            --card: #ffffff; --border: #e2e8f0; --text: #1e293b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.25s ease; }
+        body { margin: 0; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .hidden { display: none !important; }
+
+        /* --- DESIGN DOS RELATÓRIOS (IMPRESSÃO) --- */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; padding: 0; }
+            .page-break { page-break-after: always; padding: 40px; border: 2px solid #333; margin-bottom: 20px; position: relative; min-height: 100vh; }
+            .print-header { text-align: center; border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 20px; }
+            .print-header h1 { font-size: 18pt; margin: 0; color: #000; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            th, td { border: 1px solid #000 !important; padding: 6px; font-size: 9pt !important; text-align: center; color: #000; }
+            th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+            .dev-footer { position: absolute; bottom: 20px; width: 100%; text-align: center; font-size: 8pt; color: #555; border-top: 1px solid #ccc; padding-top: 10px; left: 0; }
+        }
+
+        /* --- NAVBAR --- */
+        .navbar { background: var(--secondary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .nav-logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+        .nav-logo span { color: var(--primary-light); }
+        .dev-badge { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 50px; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.2); }
+
+        /* --- CONTAINERS --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+        
+        /* --- CARDS --- */
+        .card { background: var(--card); border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02); position: relative; }
+        .card h3 { margin-top: 0; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        
+        /* --- INPUTS E BOTÕES --- */
+        input, select, textarea { width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 0.8rem; border: 1.5px solid var(--border); background: #fcfcfd; font-size: 0.95rem; }
+        input:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+        
+        .btn { padding: 0.8rem 1.5rem; border-radius: 0.8rem; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
+        .btn-danger { background: #fff1f2; color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+
+        /* --- FREQUÊNCIA ÁREA --- */
+        .table-container { overflow-x: auto; background: white; border-radius: 1rem; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 15px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; text-align: center; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+        .sticky-col { position: sticky; left: 0; background: white; z-index: 5; border-right: 2px solid #f1f5f9; text-align: left; padding-left: 20px; font-weight: 600; min-width: 250px; }
+        
+        .check-btn { width: 32px; height: 32px; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.7rem; }
+        .check-btn.present { background: #dcfce7; border-color: #22c55e; color: #15803d; }
+        .check-btn.absent { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+
+        /* --- LOGIN --- */
+        .login-box { max-width: 450px; margin: 10vh auto; text-align: center; }
+        .login-box .card { padding: 3rem; }
+
+        /* --- DASHBOARD PROFESSOR --- */
+        .prof-hero { background: linear-gradient(135deg, var(--primary) 0%, #059669 100%); color: white; padding: 3rem; border-radius: 2rem; margin-bottom: 2rem; }
+        .eletiva-item { background: white; padding: 1.5rem; border-radius: 1.2rem; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .eletiva-item:hover { border-color: var(--primary-light); transform: translateX(10px); }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; background: #f1f5f9; padding: 6px; border-radius: 1rem; }
+        .tab-btn { flex: 1; padding: 10px; border-radius: 0.8rem; border: none; font-weight: 700; cursor: pointer; color: #64748b; background: transparent; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        /* Status de salvamento */
+        #sync-status { font-size: 0.7rem; color: #10b981; margin-top: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar no-print">
+        <div class="nav-logo">ELETIVAS <span>ACM</span> 2026</div>
+        <div class="dev-badge">Dev: <b>José Cleiton Sousa Rodrigues</b> <span id="sync-status"></span></div>
+    </nav>
+
+    <div class="container">
+        <section id="view-start" class="no-print">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h1 style="font-size: 2.5rem; color: var(--secondary);">Sistema de Gestão Escolar</h1>
+                <p style="color: #64748b;">Selecione seu portal de acesso abaixo</p>
+            </div>
+            <div class="grid" style="max-width: 900px; margin: 0 auto;">
+                <div class="card" onclick="UI.nav('view-login')" style="cursor:pointer; text-align:center;">
+                    <div style="font-size: 3.5rem; margin-bottom: 1rem;">🛡️</div>
+                    <h2>Coordenadoria</h2>
+                    <p>Controle de turmas, professores e calendário acadêmico.</p>
+                </div>
+                <div class="card" onclick="UI.nav('view-login')" style="cursor:pointer; text-align:center;">
+                    <div style="font-size: 3.5rem; margin-bottom: 1rem;">👨‍🏫</div>
+                    <h2>Corpo Docente</h2>
+                    <p>Registro de frequência, planos de aula e rendimento mensal.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-login" class="hidden no-print">
+            <div class="login-box">
+                <div class="card">
+                    <h2 style="margin-bottom: 2rem;">Acesso Restrito</h2>
+                    <input id="user" type="text" placeholder="Nome de usuário">
+                    <input id="pass" type="password" placeholder="Senha de acesso">
+                    <button class="btn btn-primary" style="width:100%" onclick="App.login()">Entrar no Sistema</button>
+                    <button class="btn btn-outline" style="width:100%; margin-top:10px" onclick="UI.nav('view-start')">Cancelar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-coord" class="hidden no-print">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem">
+                <h1>Painel Administrativo</h1>
+                <button class="btn btn-danger" onclick="UI.logout()">Encerrar Sessão</button>
+            </div>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3 id="t-form-title">📦 Gerenciar Eletiva</h3>
+                    <input type="hidden" id="edit-t-id">
+                    <input id="t-nome" placeholder="Nome da Disciplina">
+                    <select id="t-dia">
+                        <option value="1">Segunda-feira</option><option value="2">Terça-feira</option>
+                        <option value="3">Quarta-feira</option><option value="4">Quinta-feira</option>
+                        <option value="5">Sexta-feira</option>
+                    </select>
+                    <textarea id="t-alunos" rows="6" placeholder="Cole aqui a lista de alunos (um por linha)"></textarea>
+                    <button class="btn btn-primary" style="width:100%" onclick="App.saveTurma()">Salvar Dados</button>
+                    <button id="t-cancel" class="hidden btn btn-outline" style="width:100%; margin-top:5px" onclick="UI.resetTForm()">Cancelar Edição</button>
+                </div>
+
+                <div class="card">
+                    <h3 id="p-form-title">👤 Gerenciar Professor</h3>
+                    <input type="hidden" id="edit-p-id">
+                    <input id="p-nome" placeholder="Nome Completo">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                        <input id="p-user" placeholder="Usuário">
+                        <input id="p-pass" type="password" placeholder="Senha">
+                    </div>
+                    <p style="font-size:0.8rem; font-weight:700; margin-bottom:5px">VINCULAR DISCIPLINAS:</p>
+                    <div id="p-turmas-check" style="max-height:150px; overflow-y:auto; border:1px solid var(--border); padding:10px; border-radius:0.8rem; background:#f8fafc; margin-bottom:1rem"></div>
+                    <button class="btn btn-primary" style="width:100%" onclick="App.saveProf()">Salvar Registro</button>
+                    <button id="p-cancel" class="hidden btn btn-outline" style="width:100%; margin-top:5px" onclick="UI.resetPForm()">Cancelar Edição</button>
+                </div>
+
+                <div class="card">
+                    <h3>📅 Calendário / Bloqueios</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                        <input type="date" id="f-data">
+                        <input id="f-desc" placeholder="Motivo">
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; background:var(--secondary)" onclick="App.saveFeriado()">Bloquear Data</button>
+                    <div id="list-feriados" style="margin-top:1.5rem; max-height:180px; overflow-y:auto"></div>
+                </div>
+            </div>
+
+            <div class="grid" style="margin-top: 2rem;">
+                <div class="card">
+                    <h3>📚 Eletivas Cadastradas</h3>
+                    <div id="list-turmas" style="display:flex; flex-direction:column; gap:10px"></div>
+                </div>
+                <div class="card">
+                    <h3>👨‍🏫 Quadro de Professores</h3>
+                    <div id="list-profs" style="display:flex; flex-direction:column; gap:10px"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-prof" class="hidden">
+            <div id="prof-home" class="no-print">
+                <div class="prof-hero">
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <div>
+                            <h1 style="margin:0">Bem-vindo(a), <span id="prof-name"></span></h1>
+                            <p style="margin:5px 0 0 0; opacity: 0.8;">Gerencie suas disciplinas e relatórios abaixo.</p>
+                        </div>
+                        <button class="btn btn-danger" onclick="UI.logout()" style="background:white; color:var(--danger)">Sair</button>
+                    </div>
+                </div>
+                <h3 style="margin-bottom: 1.5rem;">Suas Disciplinas</h3>
+                <div id="prof-turmas" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+
+            <div id="prof-workspace" class="hidden">
+                <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem">
+                    <button class="btn btn-outline" onclick="UI.closeTurma()">← Voltar ao Início</button>
+                    <div style="display:flex; gap:10px">
+                        <button class="btn btn-primary" onclick="UI.genPDF('mensal')">🖨️ Imprimir Mensal</button>
+                        <button class="btn btn-primary" style="background:var(--secondary)" onclick="UI.genPDF('anual')">📄 Relatório Anual</button>
+                    </div>
+                </div>
+
+                <div class="card no-print">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem">
+                        <h2 id="active-title" style="margin:0; color:var(--primary)"></h2>
+                        <select id="sel-mes" onchange="App.loadWork()" style="width:220px; margin:0">
+                            <option value="2">Fevereiro</option><option value="3" selected>Março</option>
+                            <option value="4">Abril</option><option value="5">Maio</option>
+                            <option value="6">Junho</option><option value="8">Agosto</option>
+                            <option value="9">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="UI.tab(this, 'tab-f')">Frequência</button>
+                        <button class="tab-btn" onclick="UI.tab(this, 'tab-p')">Plano Mensal</button>
+                        <button class="tab-btn" onclick="UI.tab(this, 'tab-n')">Nota Final</button>
+                    </div>
+
+                    <div id="tab-f" class="tab-content">
+                        <div class="table-container" id="render-f"></div>
+                    </div>
+                    <div id="tab-p" class="tab-content hidden">
+                        <textarea id="plano-txt" rows="15" placeholder="Digite aqui o relato das atividades desenvolvidas no mês..."></textarea>
+                        <button class="btn btn-primary" style="width:100%" onclick="App.savePlano()">Salvar Relatório</button>
+                    </div>
+                    <div id="tab-n" class="tab-content hidden">
+                        <div id="render-n"></div>
+                        <button class="btn btn-primary" style="width:100%; margin-top:20px" onclick="App.saveNotas()">Salvar Notas Finais</button>
+                    </div>
+                </div>
+
+                <div id="print-area" class="print-only"></div>
+            </div>
+        </section>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // CONFIGURAÇÕES DO FIREBASE (VOCÊ DEVE SUBSTITUIR PELAS SUAS)
+        const firebaseConfig = {
+            apiKey: "COLE_AQUI_SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO_ID",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "ID",
+            appId: "APP_ID"
+        };
+
+        const fbApp = initializeApp(firebaseConfig);
+        const db = getFirestore(fbApp);
+
+        // --- GESTÃO DE DADOS ---
+        const DB = {
+            key: "acm_2026_data",
+            data: { turmas: [], profs: [], logs: {}, feriados: [] },
+            
+            async load() {
+                document.getElementById('sync-status').innerText = "⌛ Carregando...";
+                try {
+                    const docRef = doc(db, "escola", "geral");
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        this.data = docSnap.data();
+                        document.getElementById('sync-status').innerText = "✅ Sincronizado";
+                    } else {
+                        document.getElementById('sync-status').innerText = "⚠️ Banco Vazio";
+                    }
+                } catch (e) {
+                    console.error("Erro ao carregar:", e);
+                    document.getElementById('sync-status').innerText = "❌ Erro Offline";
+                }
+                UI.renderCoord();
+            },
+
+            async save() {
+                document.getElementById('sync-status').innerText = "☁️ Salvando...";
+                try {
+                    await setDoc(doc(db, "escola", "geral"), this.data);
+                    document.getElementById('sync-status').innerText = "✅ Salvo";
+                } catch (e) {
+                    console.error("Erro ao salvar:", e);
+                    alert("Erro ao salvar no banco de dados! Verifique sua internet.");
+                }
+            }
+        };
+
+        window.DB = DB;
+        let session = { user: null, active: null };
+
+        // --- LÓGICA DO APP ---
+        window.App = {
+            login() {
+                const u = document.getElementById('user').value;
+                const p = document.getElementById('pass').value;
+                if(u==='23041811' && p==='1983') { UI.nav('view-coord'); UI.renderCoord(); }
+                else {
+                    const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
+                    if(prof) { session.user = prof; document.getElementById('prof-name').innerText = prof.nome; UI.nav('view-prof'); UI.renderProf(); }
+                    else alert("Credenciais incorretas.");
+                }
+            },
+
+            saveTurma() {
+                const id = document.getElementById('edit-t-id').value;
+                const nome = document.getElementById('t-nome').value;
+                const dia = document.getElementById('t-dia').value;
+                const alunos = document.getElementById('t-alunos').value.split('\n').filter(a => a.trim()).sort();
+                if(!nome) return alert("Insira o nome da disciplina.");
+                if(id) { const idx = DB.data.turmas.findIndex(t => t.id == id); DB.data.turmas[idx] = { id: Number(id), nome, dia, alunos }; }
+                else { DB.data.turmas.push({ id: Date.now(), nome, dia, alunos }); }
+                DB.save(); UI.resetTForm(); UI.renderCoord();
+            },
+
+            saveProf() {
+                const id = document.getElementById('edit-p-id').value;
+                const nome = document.getElementById('p-nome').value;
+                const user = document.getElementById('p-user').value;
+                const pass = document.getElementById('p-pass').value;
+                const tIds = Array.from(document.querySelectorAll('.t-check:checked')).map(c => c.value);
+                if(id) { const idx = DB.data.profs.findIndex(p => p.id == id); DB.data.profs[idx] = { id: Number(id), nome, user, pass, turmas: tIds }; }
+                else { DB.data.profs.push({ id: Date.now(), nome, user, pass, turmas: tIds }); }
+                DB.save(); UI.resetPForm(); UI.renderCoord();
+            },
+
+            editTurma(id) {
+                const t = DB.data.turmas.find(x => x.id == id);
+                document.getElementById('edit-t-id').value = t.id;
+                document.getElementById('t-nome').value = t.nome;
+                document.getElementById('t-dia').value = t.dia;
+                document.getElementById('t-alunos').value = t.alunos.join('\n');
+                document.getElementById('t-form-title').innerText = "✏️ Editando Disciplina";
+                document.getElementById('t-cancel').classList.remove('hidden');
+            },
+
+            editProf(id) {
+                const p = DB.data.profs.find(x => x.id == id);
+                document.getElementById('edit-p-id').value = p.id;
+                document.getElementById('p-nome').value = p.nome;
+                document.getElementById('p-user').value = p.user;
+                document.getElementById('p-pass').value = p.pass;
+                document.querySelectorAll('.t-check').forEach(c => c.checked = p.turmas.includes(c.value));
+                document.getElementById('p-form-title').innerText = "✏️ Editando Professor";
+                document.getElementById('p-cancel').classList.remove('hidden');
+            },
+
+            saveFeriado() {
+                const d = document.getElementById('f-data').value;
+                const m = document.getElementById('f-desc').value;
+                if(d) { DB.data.feriados.push({ data: d, desc: m || "Feriado" }); DB.save(); UI.renderCoord(); }
+            },
+
+            loadWork() {
+                const t = session.active; const m = document.getElementById('sel-mes').value;
+                this.renderFreq('render-f', t, m, false);
+                this.renderNotes('render-n', t, false);
+                document.getElementById('plano-txt').value = DB.data.logs[`p_${t.id}_${m}`] || '';
+            },
+
+            renderFreq(tid, t, m, isP) {
+                const diasNoMes = new Date(2026, m, 0).getDate();
+                let colunas = [];
+                for(let i=1; i<=diasNoMes; i++) {
+                    const dObj = new Date(2026, m-1, i);
+                    if(dObj.getDay() == t.dia) {
+                        const iso = dObj.toISOString().split('T')[0];
+                        const f = DB.data.feriados.find(x => x.data === iso);
+                        colunas.push({ dia: i, feriado: f ? f.desc : null });
+                    }
+                }
+                
+                let h = `<table><thead><tr><th class="sticky-col">ESTUDANTE</th>${colunas.map(c=>`<th>${c.dia}</th>`).join('')}<th>FALTAS</th></tr></thead><tbody>`;
+                t.alunos.forEach((aln, idx) => {
+                    let totalF = 0;
+                    h += `<tr><td class="sticky-col">${aln}</td>`;
+                    colunas.forEach(c => {
+                        const k = `f_${t.id}_${m}_${idx}_${c.dia}`;
+                        const isF = DB.data.logs[k] === 'F';
+                        if(isF && !c.feriado) totalF += 2;
+                        
+                        if(c.feriado) h += `<td style="background:#f1f5f9; font-size:7pt; color:#94a3b8">BLOQ</td>`;
+                        else {
+                            if(isP) h += `<td>${isF ? 'F' : '.'}</td>`;
+                            else h += `<td><button class="check-btn ${isF?'absent':'present'}" onclick="App.setF('${k}',${isF})">${isF?'F':'P'}</button></td>`;
+                        }
+                    });
+                    h += `<td style="font-weight:bold; color:${totalF>0?'#ef4444':'#22c55e'}">${totalF}</td></tr>`;
+                });
+                document.getElementById(tid).innerHTML = h + "</tbody></table>";
+            },
+
+            renderNotes(tid, t, isP) {
+                let h = `<table><thead><tr><th style="text-align:left; padding-left:20px">ESTUDANTE</th><th width="150">NOTA FINAL</th></tr></thead><tbody>`;
+                t.alunos.forEach((aln, i) => {
+                    const v = DB.data.logs[`n_${t.id}_${i}`] || '';
+                    h += `<tr><td style="text-align:left; padding-left:20px; font-weight:600">${aln}</td><td>${isP ? `<b>${v}</b>` : `<input type="text" id="ni_${i}" value="${v}" style="margin:0; text-align:center; width:80px">`}</td></tr>`;
+                });
+                document.getElementById(tid).innerHTML = h + "</tbody></table>";
+            },
+
+            setF(k, isF) { DB.data.logs[k] = isF ? 'P' : 'F'; DB.save(); App.loadWork(); },
+            saveNotas() { session.active.alunos.forEach((_, i) => DB.data.logs[`n_${session.active.id}_${i}`] = document.getElementById(`ni_${i}`).value); DB.save(); alert("Notas salvas!"); },
+            savePlano() { DB.data.logs[`p_${session.active.id}_${document.getElementById('sel-mes').value}`] = document.getElementById('plano-txt').value; DB.save(); alert("Relatório salvo!"); }
+        };
+
+        // --- INTERFACE ---
+        window.UI = {
+            nav(id) { document.querySelectorAll('section').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0); },
+            logout() { if(confirm("Deseja sair?")) location.reload(); },
+            resetTForm() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; document.getElementById('t-cancel').classList.add('hidden'); document.getElementById('t-form-title').innerText="📦 Gerenciar Eletiva"; },
+            resetPForm() { document.getElementById('edit-p-id').value=''; document.getElementById('p-nome').value=''; document.getElementById('p-user').value=''; document.getElementById('p-pass').value=''; document.querySelectorAll('.t-check').forEach(c=>c.checked=false); document.getElementById('p-cancel').classList.add('hidden'); document.getElementById('p-form-title').innerText="👤 Gerenciar Professor"; },
+            
+            renderCoord() {
+                const dias = ["","SEG","TER","QUA","QUI","SEX"];
+                document.getElementById('list-turmas').innerHTML = DB.data.turmas.map(t=>`<div class="eletiva-item"><span><b>${t.nome}</b> (${dias[t.dia]})</span> <div><button class="btn btn-outline" style="padding:5px 10px" onclick="App.editTurma(${t.id})">✏️</button><button class="btn btn-danger" style="padding:5px 10px; margin-left:5px" onclick="if(confirm('Excluir?')){DB.data.turmas=DB.data.turmas.filter(x=>x.id!=${t.id});DB.save();UI.renderCoord()}">🗑️</button></div></div>`).join('');
+                document.getElementById('list-profs').innerHTML = DB.data.profs.map(p=>`<div class="eletiva-item"><span><b>${p.nome}</b></span> <div><button class="btn btn-outline" style="padding:5px 10px" onclick="App.editProf(${p.id})">✏️</button><button class="btn btn-danger" style="padding:5px 10px; margin-left:5px" onclick="if(confirm('Excluir?')){DB.data.profs=DB.data.profs.filter(x=>x.id!=${p.id});DB.save();UI.renderCoord()}">🗑️</button></div></div>`).join('');
+                document.getElementById('p-turmas-check').innerHTML = DB.data.turmas.map(t=>`<div style="margin-bottom:5px"><input type="checkbox" class="t-check" value="${t.id}" style="width:auto; margin-right:8px"> ${t.nome}</div>`).join('');
+                document.getElementById('list-feriados').innerHTML = DB.data.feriados.map((f, i)=>`<div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:5px; border-bottom:1px solid #eee;">${f.data} - ${f.desc} <button onclick="DB.data.feriados.splice(${i},1);DB.save();UI.renderCoord()" style="border:none; color:red; cursor:pointer">✕</button></div>`).join('');
+            },
+
+            renderProf() {
+                document.getElementById('prof-turmas').innerHTML = session.user.turmas.map(tid=>{
+                    const t = DB.data.turmas.find(x=>x.id==tid);
+                    return t ? `<div class="eletiva-item" onclick="UI.openTurma(${t.id})"><div><b style="font-size:1.1rem">${t.nome}</b><br><small style="color:#64748b">Clique para gerenciar diário</small></div> <span style="font-size:1.5rem">➡️</span></div>` : '';
+                }).join('');
+            },
+
+            openTurma(id) { session.active = DB.data.turmas.find(x=>x.id==id); document.getElementById('active-title').innerText = session.active.nome; UI.nav('view-prof'); document.getElementById('prof-home').classList.add('hidden'); document.getElementById('prof-workspace').classList.remove('hidden'); App.loadWork(); },
+            closeTurma() { document.getElementById('prof-home').classList.remove('hidden'); document.getElementById('prof-workspace').classList.add('hidden'); },
+            tab(b, id) { document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden')); b.classList.add('active'); document.getElementById(id).classList.remove('hidden'); },
+
+            genPDF(tipo) {
+                const area = document.getElementById('print-area');
+                const t = session.active;
+                const m = document.getElementById('sel-mes').value;
+                const nMes = ["","","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+                
+                const header = (periodo) => `<div class="print-header"><h1>EEMTI ANTONIO CUSTÓDIO DE MESQUITA</h1><p><b>DIÁRIO DE CLASSE - ELETIVAS 2026</b></p><p>PROFESSOR(A): ${session.user.nome.toUpperCase()} | DISCIPLINA: ${t.nome.toUpperCase()} | MÊS: ${periodo.toUpperCase()}</p></div>`;
+                const sigs = `<div style="display:flex; justify-content:space-around; margin-top:50px"><div style="border-top:1px solid #000; width:200px; text-align:center; font-size:9pt">Assinatura do Professor</div><div style="border-top:1px solid #000; width:200px; text-align:center; font-size:9pt">Coordenação Pedagógica</div></div>`;
+                const foot = `<div class="dev-footer">Sistema desenvolvido por José Cleiton Sousa Rodrigues | 2026 ©</div>`;
+
+                if(tipo === 'mensal') {
+                    area.innerHTML = `<div class="page-break">${header(nMes[m])} <h3 style="text-align:center">CONTROLE DE FREQUÊNCIA</h3> <div id="pdf-f"></div> <br> <h3>PLANO DE AULA / ATIVIDADES:</h3> <div style="border:1px solid #000; padding:15px; min-height:200px; font-size:10pt">${DB.data.logs[`p_${t.id}_${m}`] || 'Nenhum relato registrado.'}</div> ${sigs} ${foot}</div>`;
+                    App.renderFreq('pdf-f', t, m, true);
+                } else {
+                    area.innerHTML = `<div class="page-break">${header("ANUAL")} <h3 style="text-align:center">MAPA DE RENDIMENTO FINAL</h3> <div id="pdf-n"></div> ${sigs} ${foot}</div>`;
+                    App.renderNotes('pdf-n', t, true);
+                    [2,3,4,5,6,8,9,10,11,12].forEach(mes => {
+                        area.innerHTML += `<div class="page-break">${header(nMes[mes])} <h3 style="text-align:center">CONTROLE DE FREQUÊNCIA</h3> <div id="pdf-f-${mes}"></div> ${foot}</div>`;
+                    });
+                    setTimeout(() => [2,3,4,5,6,8,9,10,11,12].forEach(mes => App.renderFreq(`pdf-f-${mes}`, t, mes, true)), 100);
+                }
+                setTimeout(() => window.print(), 500);
+            }
+        };
+
+        // Iniciar carregamento
+        DB.load();
+    </script>
+</body>
+</html>
