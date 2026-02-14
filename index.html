@@ -14,155 +14,196 @@
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.25s ease; }
         body { margin: 0; background-color: var(--bg); color: var(--text); line-height: 1.6; }
         .hidden { display: none !important; }
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white; padding: 0; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            th, td { border: 1px solid #000 !important; padding: 6px; font-size: 9pt !important; text-align: center; }
-        }
+        
         .navbar { background: var(--secondary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .nav-logo { font-weight: 800; font-size: 1.2rem; }
         .nav-logo span { color: var(--primary-light); }
         .dev-badge { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 50px; font-size: 0.75rem; }
+        
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
-        .card { background: var(--card); border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border); }
-        input, select, textarea { width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 0.8rem; border: 1.5px solid var(--border); }
+        .card { background: var(--card); border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02); }
+        
+        input, select, textarea { width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 0.8rem; border: 1.5px solid var(--border); background: #fcfcfc; }
         .btn { padding: 0.8rem 1.5rem; border-radius: 0.8rem; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-danger { background: #fff1f2; color: var(--danger); }
         .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+        
         .table-container { overflow-x: auto; background: white; border-radius: 1rem; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; padding: 15px; font-size: 0.7rem; color: #64748b; }
-        .sticky-col { position: sticky; left: 0; background: white; z-index: 5; border-right: 2px solid #f1f5f9; min-width: 200px; }
-        .check-btn { width: 32px; height: 32px; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; font-weight: 800; }
+        th { background: #f8fafc; padding: 15px; font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 0.85rem; }
+        .sticky-col { position: sticky; left: 0; background: white; z-index: 5; border-right: 2px solid #f1f5f9; min-width: 200px; text-align: left; font-weight: 600; }
+        
+        .check-btn { width: 32px; height: 32px; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
         .check-btn.present { background: #dcfce7; border-color: #22c55e; color: #15803d; }
         .check-btn.absent { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+        
         .login-box { max-width: 450px; margin: 10vh auto; text-align: center; }
-        .prof-hero { background: linear-gradient(135deg, var(--primary) 0%, #059669 100%); color: white; padding: 3rem; border-radius: 2rem; margin-bottom: 2rem; }
-        .eletiva-item { background: white; padding: 1.5rem; border-radius: 1.2rem; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .prof-hero { background: linear-gradient(135deg, var(--primary) 0%, #059669 100%); color: white; padding: 3rem; border-radius: 2rem; margin-bottom: 2rem; position: relative; overflow: hidden; }
+        .eletiva-item { background: white; padding: 1.5rem; border-radius: 1.2rem; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .eletiva-item:hover { border-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        
         .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; background: #f1f5f9; padding: 6px; border-radius: 1rem; }
-        .tab-btn { flex: 1; padding: 10px; border-radius: 0.8rem; border: none; cursor: pointer; font-weight: 700; }
-        .tab-btn.active { background: white; color: var(--primary); }
-        #sync-status { font-size: 0.7rem; color: #10b981; margin-top: 5px; font-weight: bold; }
+        .tab-btn { flex: 1; padding: 10px; border-radius: 0.8rem; border: none; cursor: pointer; font-weight: 700; color: #64748b; background: transparent; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        #sync-status { font-size: 0.75rem; font-weight: 700; }
     </style>
 </head>
 <body>
 
     <nav class="navbar no-print">
         <div class="nav-logo">ELETIVAS <span>ACM</span> 2026</div>
-        <div class="dev-badge">Dev: <b>José Cleiton</b> <span id="sync-status"></span></div>
+        <div class="dev-badge">Status: <span id="sync-status">Conectando...</span></div>
     </nav>
 
     <div class="container">
-        <section id="view-start" class="no-print">
+        <section id="view-start">
             <div style="text-align: center; margin-bottom: 3rem;">
-                <h1>Sistema de Gestão Escolar</h1>
-                <p>Selecione seu portal de acesso abaixo</p>
+                <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Bem-vindo ao Portal Escolar</h1>
+                <p style="color: #64748b; font-size: 1.1rem;">Escolha seu perfil para continuar</p>
             </div>
-            <div class="grid" style="max-width: 900px; margin: 0 auto;">
+            <div class="grid" style="max-width: 800px; margin: 0 auto;">
                 <div class="card" onclick="UI.nav('view-login')" style="cursor:pointer; text-align:center;">
-                    <div style="font-size: 3.5rem;">🛡️</div>
-                    <h2>Coordenadoria</h2>
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🛡️</div>
+                    <h2 style="margin:0">Gestão</h2>
+                    <p style="color:#64748b">Coordenadoria e Administrativo</p>
                 </div>
                 <div class="card" onclick="UI.nav('view-login')" style="cursor:pointer; text-align:center;">
-                    <div style="font-size: 3.5rem;">👨‍🏫</div>
-                    <h2>Corpo Docente</h2>
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">👨‍🏫</div>
+                    <h2 style="margin:0">Docente</h2>
+                    <p style="color:#64748b">Diários, Notas e Frequência</p>
                 </div>
             </div>
         </section>
 
-        <section id="view-login" class="hidden no-print">
+        <section id="view-login" class="hidden">
             <div class="login-box">
                 <div class="card">
-                    <h2>Acesso Restrito</h2>
-                    <input id="user" type="text" placeholder="Número de Usuário">
-                    <input id="pass" type="password" placeholder="Senha Numérica">
-                    <button class="btn btn-primary" style="width:100%" onclick="App.login()">Entrar</button>
-                    <button class="btn btn-outline" style="width:100%; margin-top:10px" onclick="UI.nav('view-start')">Voltar</button>
+                    <h2 style="margin-top:0">Acesso Restrito</h2>
+                    <p style="color:#64748b; margin-bottom:2rem">Insira suas credenciais numéricas</p>
+                    <input id="user" type="text" placeholder="Usuário">
+                    <input id="pass" type="password" placeholder="Senha">
+                    <button class="btn btn-primary" style="width:100%" onclick="App.login()">Entrar no Sistema</button>
+                    <button class="btn btn-outline" style="width:100%; margin-top:10px" onclick="UI.nav('view-start')">Cancelar</button>
                 </div>
             </div>
         </section>
 
-        <section id="view-coord" class="hidden no-print">
-            <div style="display:flex; justify-content:space-between; margin-bottom:2rem">
-                <h1>Painel Administrativo</h1>
-                <button class="btn btn-danger" onclick="UI.logout()">Sair</button>
+        <section id="view-coord" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem">
+                <div>
+                    <h1 style="margin:0">Painel de Controle</h1>
+                    <p style="color:#64748b">Configuração de Eletivas e Professores</p>
+                </div>
+                <button class="btn btn-danger" onclick="UI.logout()">Sair do Sistema</button>
             </div>
+            
             <div class="grid">
                 <div class="card">
                     <h3 id="t-form-title">📦 Gerenciar Eletiva</h3>
                     <input type="hidden" id="edit-t-id">
-                    <input id="t-nome" placeholder="Nome da Eletiva">
+                    <input id="t-nome" placeholder="Título da Eletiva">
                     <select id="t-dia">
-                        <option value="1">Segunda</option><option value="2">Terça</option>
-                        <option value="3">Quarta</option><option value="4">Quinta</option>
-                        <option value="5">Sexta</option>
+                        <option value="1">Segunda-feira</option>
+                        <option value="2">Terça-feira</option>
+                        <option value="3">Quarta-feira</option>
+                        <option value="4">Quinta-feira</option>
+                        <option value="5">Sexta-feira</option>
                     </select>
-                    <textarea id="t-alunos" rows="5" placeholder="Lista de alunos (um por linha)"></textarea>
-                    <button class="btn btn-primary" style="width:100%" onclick="App.saveTurma()">Salvar Eletiva</button>
+                    <textarea id="t-alunos" rows="6" placeholder="Alunos (um por linha)"></textarea>
+                    <button class="btn btn-primary" style="width:100%" onclick="App.saveTurma()">Confirmar Cadastro</button>
                 </div>
+
                 <div class="card">
                     <h3 id="p-form-title">👤 Gerenciar Professor</h3>
                     <input type="hidden" id="edit-p-id">
-                    <input id="p-nome" placeholder="Nome do Professor">
-                    <input id="p-user" placeholder="Usuário (Número)">
-                    <input id="p-pass" type="password" placeholder="Senha (Número)">
-                    <div id="p-turmas-check" style="max-height:100px; overflow-y:auto; border:1px solid #ddd; padding:10px; margin-bottom:10px"></div>
-                    <button class="btn btn-primary" style="width:100%" onclick="App.saveProf()">Salvar Professor</button>
+                    <input id="p-nome" placeholder="Nome Completo">
+                    <input id="p-user" placeholder="Matrícula/Usuário">
+                    <input id="p-pass" type="password" placeholder="Senha de Acesso">
+                    <p style="font-size: 0.8rem; font-weight:bold; margin-bottom:0.5rem">Vincular Eletivas:</p>
+                    <div id="p-turmas-check" style="max-height:120px; overflow-y:auto; border:1.5px solid var(--border); border-radius:0.8rem; padding:10px; margin-bottom:15px; background: #fafafa;"></div>
+                    <button class="btn btn-primary" style="width:100%" onclick="App.saveProf()">Confirmar Cadastro</button>
                 </div>
             </div>
-            <div class="grid" style="margin-top:20px">
-                <div class="card"><h3>📚 Eletivas</h3><div id="list-turmas"></div></div>
-                <div class="card"><h3>👨‍🏫 Professores</h3><div id="list-profs"></div></div>
+
+            <div class="grid" style="margin-top:2rem">
+                <div class="card">
+                    <h3>📚 Eletivas Ativas</h3>
+                    <div id="list-turmas"></div>
+                </div>
+                <div class="card">
+                    <h3>👨‍🏫 Professores Cadastrados</h3>
+                    <div id="list-profs"></div>
+                </div>
             </div>
         </section>
 
         <section id="view-prof" class="hidden">
-            <div id="prof-home" class="no-print">
+            <div id="prof-home">
                 <div class="prof-hero">
-                    <h1>Olá, <span id="prof-name"></span></h1>
-                    <button class="btn btn-danger" onclick="UI.logout()" style="background:white; color:red">Sair</button>
+                    <h1 style="margin:0">Olá, <span id="prof-name"></span></h1>
+                    <p>Painel do Docente - Ciclo 2026</p>
+                    <button class="btn" onclick="UI.logout()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.2); color:white">Sair</button>
                 </div>
-                <h3>Suas Eletivas:</h3>
-                <div id="prof-turmas"></div>
+                <h3 style="margin-bottom:1.5rem">Selecione uma Eletiva:</h3>
+                <div id="prof-turmas" class="grid" style="grid-template-columns: 1fr;"></div>
             </div>
+
             <div id="prof-workspace" class="hidden">
-                <button class="btn btn-outline no-print" onclick="UI.closeTurma()">← Voltar</button>
-                <div class="card" style="margin-top:20px">
-                    <h2 id="active-title"></h2>
-                    <select id="sel-mes" onchange="App.loadWork()">
-                        <option value="2">Fevereiro</option><option value="3" selected>Março</option>
-                        <option value="4">Abril</option><option value="5">Maio</option>
-                        <option value="6">Junho</option><option value="8">Agosto</option>
-                        <option value="9">Setembro</option><option value="10">Outubro</option>
-                        <option value="11">Novembro</option><option value="12">Dezembro</option>
-                    </select>
+                <button class="btn btn-outline" onclick="UI.closeTurma()" style="margin-bottom:1.5rem">← Selecionar outra Eletiva</button>
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem">
+                        <div>
+                            <h2 id="active-title" style="margin:0; color:var(--primary)"></h2>
+                            <p id="active-info" style="color:#64748b; margin:0"></p>
+                        </div>
+                        <select id="sel-mes" style="width:auto; margin:0" onchange="App.loadWork()">
+                            <option value="2">Fevereiro</option><option value="3" selected>Março</option>
+                            <option value="4">Abril</option><option value="5">Maio</option>
+                            <option value="6">Junho</option><option value="8">Agosto</option>
+                            <option value="9">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+
                     <div class="tabs">
                         <button class="tab-btn active" onclick="UI.tab(this, 'tab-f')">Frequência</button>
-                        <button class="tab-btn" onclick="UI.tab(this, 'tab-p')">Plano</button>
                         <button class="tab-btn" onclick="UI.tab(this, 'tab-n')">Notas</button>
+                        <button class="tab-btn" onclick="UI.tab(this, 'tab-p')">Plano de Aula</button>
                     </div>
-                    <div id="tab-f" class="tab-content"><div class="table-container" id="render-f"></div></div>
+
+                    <div id="tab-f" class="tab-content">
+                        <div class="table-container" id="render-f"></div>
+                        <p style="font-size:0.8rem; color:#64748b; margin-top:1rem">Clique no botão para alternar entre <b>P</b> (Presença) e <b>F</b> (Falta).</p>
+                    </div>
+
+                    <div id="tab-n" class="tab-content hidden">
+                        <div class="table-container" id="render-n"></div>
+                        <button class="btn btn-primary" style="margin-top:1.5rem; width:100%" onclick="App.saveNotas()">Salvar Notas do Bimestre</button>
+                    </div>
+
                     <div id="tab-p" class="tab-content hidden">
-                        <textarea id="plano-txt" rows="10"></textarea>
-                        <button class="btn btn-primary" onclick="App.savePlano()">Salvar Plano</button>
+                        <textarea id="plano-txt" rows="12" placeholder="Descreva os objetivos, conteúdos e metodologias das aulas deste mês..."></textarea>
+                        <button class="btn btn-primary" style="width:100%" onclick="App.savePlano()">Salvar Plano Mensal</button>
                     </div>
-                    <div id="tab-n" class="tab-content hidden"><div id="render-n"></div><button class="btn btn-primary" style="margin-top:10px" onclick="App.saveNotas()">Salvar Notas</button></div>
-                    <button class="btn btn-primary no-print" style="margin-top:20px" onclick="window.print()">🖨️ Imprimir Diário</button>
+
+                    <button class="btn btn-outline" style="margin-top:2rem; width:100%; border-style: dashed;" onclick="window.print()">🖨️ Gerar PDF / Imprimir Diário</button>
                 </div>
             </div>
         </section>
     </div>
 
     <script>
+        // CONFIGURAÇÃO DE COMUNICAÇÃO (Onde estava o erro)
         const SUPABASE_URL = 'https://xsddhhowfptgulllxhwj.supabase.co';
         const SUPABASE_KEY = 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6';
 
         const DB = {
             data: { turmas: [], profs: [], logs: {}, feriados: [] },
+            
             async load() {
                 document.getElementById('sync-status').innerText = "⌛ Carregando...";
                 try {
@@ -170,18 +211,33 @@
                         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                     });
                     const res = await response.json();
-                    if (res.length > 0) { this.data = res[0].conteudo; document.getElementById('sync-status').innerText = "✅ Conectado"; }
-                } catch (e) { document.getElementById('sync-status').innerText = "❌ Erro"; }
+                    if (res && res.length > 0) {
+                        this.data = res[0].conteudo;
+                        document.getElementById('sync-status').innerText = "✅ Sincronizado";
+                    }
+                } catch (e) { 
+                    document.getElementById('sync-status').innerText = "❌ Erro de Rede"; 
+                }
                 UI.renderCoord();
             },
+
             async save() {
-                document.getElementById('sync-status').innerText = "☁️ Salvando...";
-                await fetch(`${SUPABASE_URL}/rest/v1/dados_eletivas?chave=eq.geral`, {
-                    method: 'POST',
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-upsert' },
-                    body: JSON.stringify({ chave: 'geral', conteudo: this.data })
-                });
-                document.getElementById('sync-status').innerText = "✅ Salvo";
+                document.getElementById('sync-status').innerText = "☁️ Gravando...";
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/dados_eletivas?chave=eq.geral`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'resolution=merge-upsert'
+                        },
+                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
+                    });
+                    if (response.ok) document.getElementById('sync-status').innerText = "✅ Salvo!";
+                } catch (e) {
+                    document.getElementById('sync-status').innerText = "❌ Erro ao Salvar";
+                }
             }
         };
 
@@ -191,45 +247,69 @@
             login() {
                 const u = document.getElementById('user').value;
                 const p = document.getElementById('pass').value;
-                if(u==='23041811' && p==='1983') UI.nav('view-coord');
+                if(u==='23041811' && p==='1983') { UI.nav('view-coord'); }
                 else {
                     const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
-                    if(prof) { session.user = prof; document.getElementById('prof-name').innerText = prof.nome; UI.nav('view-prof'); UI.renderProf(); }
-                    else alert("Erro!");
+                    if(prof) { 
+                        session.user = prof; 
+                        document.getElementById('prof-name').innerText = prof.nome; 
+                        UI.nav('view-prof'); 
+                        UI.renderProf(); 
+                    } else { alert("Acesso negado!"); }
                 }
             },
+
             saveTurma() {
                 const id = document.getElementById('edit-t-id').value || Date.now();
                 const nome = document.getElementById('t-nome').value;
                 const dia = document.getElementById('t-dia').value;
                 const alunos = document.getElementById('t-alunos').value.split('\n').filter(a => a.trim()).sort();
+                
+                if(!nome || alunos.length === 0) return alert("Preencha tudo!");
+
                 const nova = { id, nome, dia, alunos };
                 const idx = DB.data.turmas.findIndex(t => t.id == id);
-                if(idx > -1) DB.data.turmas[idx] = nova; else DB.data.turmas.push(nova);
+                
+                if(idx > -1) DB.data.turmas[idx] = nova;
+                else DB.data.turmas.push(nova);
+                
                 DB.save(); UI.renderCoord(); UI.clearT();
             },
+
             saveProf() {
                 const id = document.getElementById('edit-p-id').value || Date.now();
                 const nome = document.getElementById('p-nome').value;
                 const user = document.getElementById('p-user').value;
                 const pass = document.getElementById('p-pass').value;
                 const tIds = Array.from(document.querySelectorAll('.t-check:checked')).map(c => c.value);
+
+                if(!nome || !user || !pass) return alert("Preencha tudo!");
+
                 const novo = { id, nome, user, pass, turmas: tIds };
                 const idx = DB.data.profs.findIndex(p => p.id == id);
-                if(idx > -1) DB.data.profs[idx] = novo; else DB.data.profs.push(novo);
+                
+                if(idx > -1) DB.data.profs[idx] = novo;
+                else DB.data.profs.push(novo);
+
                 DB.save(); UI.renderCoord(); UI.clearP();
             },
+
             loadWork() {
-                const t = session.active; const m = document.getElementById('sel-mes').value;
+                const t = session.active; 
+                const m = document.getElementById('sel-mes').value;
                 this.renderFreq(t, m);
                 this.renderNotes(t);
                 document.getElementById('plano-txt').value = DB.data.logs[`p_${t.id}_${m}`] || '';
             },
+
             renderFreq(t, m) {
                 const diasNoMes = new Date(2026, m, 0).getDate();
                 let colunas = [];
-                for(let i=1; i<=diasNoMes; i++) if(new Date(2026, m-1, i).getDay() == t.dia) colunas.push(i);
-                let h = `<table><tr><th class="sticky-col">ALUNO</th>${colunas.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+                for(let i=1; i<=diasNoMes; i++) {
+                    if(new Date(2026, m-1, i).getDay() == t.dia) colunas.push(i);
+                }
+                
+                let h = `<table><thead><tr><th class="sticky-col">ALUNO</th>${colunas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
                 t.alunos.forEach((aln, idx) => {
                     h += `<tr><td class="sticky-col">${aln}</td>`;
                     colunas.forEach(c => {
@@ -239,45 +319,111 @@
                     });
                     h += `</tr>`;
                 });
-                document.getElementById('render-f').innerHTML = h + "</table>";
+                document.getElementById('render-f').innerHTML = h + "</tbody></table>";
             },
+
             renderNotes(t) {
-                let h = `<table><tr><th>ALUNO</th><th>NOTA</th></tr>`;
+                let h = `<table><thead><tr><th style="text-align:left">NOME DO ALUNO</th><th style="width:120px">NOTA FINAL</th></tr></thead><tbody>`;
                 t.alunos.forEach((aln, i) => {
                     const v = DB.data.logs[`n_${t.id}_${i}`] || '';
-                    h += `<tr><td>${aln}</td><td><input type="text" id="ni_${i}" value="${v}" style="margin:0; width:60px"></td></tr>`;
+                    h += `<tr><td style="text-align:left">${aln}</td><td><input type="text" id="ni_${i}" value="${v}" style="margin:0; text-align:center"></td></tr>`;
                 });
-                document.getElementById('render-n').innerHTML = h + "</table>";
+                document.getElementById('render-n').innerHTML = h + "</tbody></table>";
             },
+
             setF(k, isF) { DB.data.logs[k] = isF ? 'P' : 'F'; DB.save(); App.loadWork(); },
-            saveNotas() { session.active.alunos.forEach((_, i) => DB.data.logs[`n_${session.active.id}_${i}`] = document.getElementById(`ni_${i}`).value); DB.save(); alert("Salvo!"); },
-            savePlano() { DB.data.logs[`p_${session.active.id}_${document.getElementById('sel-mes').value}`] = document.getElementById('plano-txt').value; DB.save(); alert("Salvo!"); }
+            saveNotas() { session.active.alunos.forEach((_, i) => DB.data.logs[`n_${session.active.id}_${i}`] = document.getElementById(`ni_${i}`).value); DB.save(); alert("Notas gravadas com sucesso!"); },
+            savePlano() { DB.data.logs[`p_${session.active.id}_${document.getElementById('sel-mes').value}`] = document.getElementById('plano-txt').value; DB.save(); alert("Plano mensal salvo!"); }
         };
 
         const UI = {
             nav(id) { document.querySelectorAll('section').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); },
             logout() { location.reload(); },
-            clearT() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; },
-            clearP() { document.getElementById('edit-p-id').value=''; document.getElementById('p-nome').value=''; document.getElementById('p-user').value=''; document.getElementById('p-pass').value=''; },
-            editT(id) { const t = DB.data.turmas.find(x=>x.id==id); document.getElementById('edit-t-id').value=t.id; document.getElementById('t-nome').value=t.nome; document.getElementById('t-dia').value=t.dia; document.getElementById('t-alunos').value=t.alunos.join('\n'); },
-            editP(id) { const p = DB.data.profs.find(x=>x.id==id); document.getElementById('edit-p-id').value=p.id; document.getElementById('p-nome').value=p.nome; document.getElementById('p-user').value=p.user; document.getElementById('p-pass').value=p.pass; },
-            delT(id) { DB.data.turmas = DB.data.turmas.filter(x=>x.id!=id); DB.save(); UI.renderCoord(); },
-            delP(id) { DB.data.profs = DB.data.profs.filter(x=>x.id!=id); DB.save(); UI.renderCoord(); },
-            renderCoord() {
-                document.getElementById('list-turmas').innerHTML = DB.data.turmas.map(t=>`<div class="eletiva-item">${t.nome} <div><button onclick="UI.editT(${t.id})">✏️</button><button onclick="UI.delT(${t.id})">🗑️</button></div></div>`).join('');
-                document.getElementById('list-profs').innerHTML = DB.data.profs.map(p=>`<div class="eletiva-item">${p.nome} <div><button onclick="UI.editP(${p.id})">✏️</button><button onclick="UI.delP(${p.id})">🗑️</button></div></div>`).join('');
-                document.getElementById('p-turmas-check').innerHTML = DB.data.turmas.map(t=>`<div><input type="checkbox" class="t-check" value="${t.id}"> ${t.nome}</div>`).join('');
+            clearT() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; document.getElementById('t-form-title').innerText='📦 Gerenciar Eletiva'; },
+            clearP() { document.getElementById('edit-p-id').value=''; document.getElementById('p-nome').value=''; document.getElementById('p-user').value=''; document.getElementById('p-pass').value=''; document.getElementById('p-form-title').innerText='👤 Gerenciar Professor'; },
+            
+            editT(id) { 
+                const t = DB.data.turmas.find(x=>x.id==id); 
+                document.getElementById('edit-t-id').value=t.id; 
+                document.getElementById('t-nome').value=t.nome; 
+                document.getElementById('t-dia').value=t.dia; 
+                document.getElementById('t-alunos').value=t.alunos.join('\n'); 
+                document.getElementById('t-form-title').innerText='📝 Editando Eletiva';
             },
+            
+            editP(id) { 
+                const p = DB.data.profs.find(x=>x.id==id); 
+                document.getElementById('edit-p-id').value=p.id; 
+                document.getElementById('p-nome').value=p.nome; 
+                document.getElementById('p-user').value=p.user; 
+                document.getElementById('p-pass').value=p.pass; 
+                document.getElementById('p-form-title').innerText='📝 Editando Professor';
+                // Marcar as checkboxes das turmas que ele já tem
+                document.querySelectorAll('.t-check').forEach(ck => ck.checked = p.turmas.includes(ck.value));
+            },
+            
+            delT(id) { if(confirm("Excluir esta eletiva?")) { DB.data.turmas = DB.data.turmas.filter(x=>x.id!=id); DB.save(); this.renderCoord(); } },
+            delP(id) { if(confirm("Excluir este professor?")) { DB.data.profs = DB.data.profs.filter(x=>x.id!=id); DB.save(); this.renderCoord(); } },
+
+            renderCoord() {
+                document.getElementById('list-turmas').innerHTML = DB.data.turmas.map(t=>`
+                    <div class="eletiva-item">
+                        <span>${t.nome}</span>
+                        <div>
+                            <button class="btn btn-outline" style="padding:5px 10px" onclick="UI.editT(${t.id})">✏️</button>
+                            <button class="btn btn-danger" style="padding:5px 10px" onclick="UI.delT(${t.id})">🗑️</button>
+                        </div>
+                    </div>`).join('');
+                
+                document.getElementById('list-profs').innerHTML = DB.data.profs.map(p=>`
+                    <div class="eletiva-item">
+                        <span>${p.nome}</span>
+                        <div>
+                            <button class="btn btn-outline" style="padding:5px 10px" onclick="UI.editP(${p.id})">✏️</button>
+                            <button class="btn btn-danger" style="padding:5px 10px" onclick="UI.delP(${p.id})">🗑️</button>
+                        </div>
+                    </div>`).join('');
+
+                document.getElementById('p-turmas-check').innerHTML = DB.data.turmas.map(t=>`
+                    <label style="display:flex; align-items:center; gap:8px; margin-bottom:5px; cursor:pointer">
+                        <input type="checkbox" class="t-check" value="${t.id}"> ${t.nome}
+                    </label>`).join('');
+            },
+
             renderProf() {
                 document.getElementById('prof-turmas').innerHTML = session.user.turmas.map(tid=>{
                     const t = DB.data.turmas.find(x=>x.id==tid);
-                    return t ? `<div class="eletiva-item" onclick="UI.openTurma(${t.id})">${t.nome} <span>➡️</span></div>` : '';
+                    return t ? `<div class="eletiva-item" onclick="UI.openTurma(${t.id})">
+                        <div>
+                            <b style="font-size:1.1rem">${t.nome}</b><br>
+                            <small style="color:#64748b">Clique para abrir o diário</small>
+                        </div>
+                        <span style="font-size:1.5rem">➡️</span>
+                    </div>` : '';
                 }).join('');
             },
-            openTurma(id) { session.active = DB.data.turmas.find(x=>x.id==id); document.getElementById('active-title').innerText = session.active.nome; document.getElementById('prof-home').classList.add('hidden'); document.getElementById('prof-workspace').classList.remove('hidden'); App.loadWork(); },
-            closeTurma() { document.getElementById('prof-home').classList.remove('hidden'); document.getElementById('prof-workspace').classList.add('hidden'); },
-            tab(b, id) { document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden')); b.classList.add('active'); document.getElementById(id).classList.remove('hidden'); }
+
+            openTurma(id) { 
+                session.active = DB.data.turmas.find(x=>x.id==id); 
+                document.getElementById('active-title').innerText = session.active.nome; 
+                document.getElementById('prof-home').classList.add('hidden'); 
+                document.getElementById('prof-workspace').classList.remove('hidden'); 
+                App.loadWork(); 
+            },
+
+            closeTurma() { 
+                document.getElementById('prof-home').classList.remove('hidden'); 
+                document.getElementById('prof-workspace').classList.add('hidden'); 
+            },
+
+            tab(b, id) { 
+                document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); 
+                document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden')); 
+                b.classList.add('active'); 
+                document.getElementById(id).classList.remove('hidden'); 
+            }
         };
+
         DB.load();
     </script>
 </body>
