@@ -240,54 +240,75 @@
         </section>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // CONFIGURAÇÕES DO FIREBASE (VOCÊ DEVE SUBSTITUIR PELAS SUAS)
-        const firebaseConfig = {
-            apiKey: "COLE_AQUI_SUA_API_KEY",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            projectId: "SEU_PROJETO_ID",
-            storageBucket: "SEU_PROJETO.appspot.com",
-            messagingSenderId: "ID",
-            appId: "APP_ID"
+    <script>
+        // CONFIGURAÇÕES DO SUPABASE
+        const DB_CONFIG = {
+            url: 'https://xsddhhowfptgulllxhwj.supabase.co',
+            key: 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6'
         };
-
-        const fbApp = initializeApp(firebaseConfig);
-        const db = getFirestore(fbApp);
 
         // --- GESTÃO DE DADOS ---
         const DB = {
-            key: "acm_2026_data",
             data: { turmas: [], profs: [], logs: {}, feriados: [] },
             
             async load() {
-                document.getElementById('sync-status').innerText = "⌛ Carregando...";
+                const status = document.getElementById('sync-status');
+                status.innerText = "⌛ Carregando...";
                 try {
-                    const docRef = doc(db, "escola", "geral");
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        this.data = docSnap.data();
-                        document.getElementById('sync-status').innerText = "✅ Sincronizado";
+                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
+                        headers: { 
+                            'apikey': DB_CONFIG.key, 
+                            'Authorization': `Bearer ${DB_CONFIG.key}` 
+                        }
+                    });
+                    const res = await response.json();
+                    
+                    if (res && res.length > 0) {
+                        this.data = res[0].conteudo;
+                        status.innerText = "✅ Sincronizado";
                     } else {
-                        document.getElementById('sync-status').innerText = "⚠️ Banco Vazio";
+                        status.innerText = "⚠️ Banco Vazio";
+                        // Tentativa de Migração: Busca dados do LocalStorage antigo
+                        const local = localStorage.getItem("acm_2026_data");
+                        if(local) {
+                            this.data = JSON.parse(local);
+                            status.innerText = "🚚 Migrando Local...";
+                            await this.save();
+                        }
                     }
                 } catch (e) {
                     console.error("Erro ao carregar:", e);
-                    document.getElementById('sync-status').innerText = "❌ Erro Offline";
+                    status.innerText = "❌ Erro de Conexão";
+                    // Fallback para local se offline
+                    const local = localStorage.getItem("acm_2026_data");
+                    if(local) this.data = JSON.parse(local);
                 }
                 UI.renderCoord();
             },
 
             async save() {
-                document.getElementById('sync-status').innerText = "☁️ Salvando...";
+                const status = document.getElementById('sync-status');
+                status.innerText = "☁️ Salvando...";
                 try {
-                    await setDoc(doc(db, "escola", "geral"), this.data);
-                    document.getElementById('sync-status').innerText = "✅ Salvo";
+                    // Cache local por segurança
+                    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
+
+                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': DB_CONFIG.key,
+                            'Authorization': `Bearer ${DB_CONFIG.key}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'resolution=merge-upsert'
+                        },
+                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
+                    });
+                    
+                    if(response.ok) status.innerText = "✅ Salvo";
+                    else throw new Error("Falha no servidor");
                 } catch (e) {
                     console.error("Erro ao salvar:", e);
-                    alert("Erro ao salvar no banco de dados! Verifique sua internet.");
+                    status.innerText = "❌ Erro ao Salvar";
                 }
             }
         };
@@ -375,7 +396,6 @@
                         colunas.push({ dia: i, feriado: f ? f.desc : null });
                     }
                 }
-                
                 let h = `<table><thead><tr><th class="sticky-col">ESTUDANTE</th>${colunas.map(c=>`<th>${c.dia}</th>`).join('')}<th>FALTAS</th></tr></thead><tbody>`;
                 t.alunos.forEach((aln, idx) => {
                     let totalF = 0;
@@ -384,7 +404,6 @@
                         const k = `f_${t.id}_${m}_${idx}_${c.dia}`;
                         const isF = DB.data.logs[k] === 'F';
                         if(isF && !c.feriado) totalF += 2;
-                        
                         if(c.feriado) h += `<td style="background:#f1f5f9; font-size:7pt; color:#94a3b8">BLOQ</td>`;
                         else {
                             if(isP) h += `<td>${isF ? 'F' : '.'}</td>`;
@@ -416,7 +435,6 @@
             logout() { if(confirm("Deseja sair?")) location.reload(); },
             resetTForm() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; document.getElementById('t-cancel').classList.add('hidden'); document.getElementById('t-form-title').innerText="📦 Gerenciar Eletiva"; },
             resetPForm() { document.getElementById('edit-p-id').value=''; document.getElementById('p-nome').value=''; document.getElementById('p-user').value=''; document.getElementById('p-pass').value=''; document.querySelectorAll('.t-check').forEach(c=>c.checked=false); document.getElementById('p-cancel').classList.add('hidden'); document.getElementById('p-form-title').innerText="👤 Gerenciar Professor"; },
-            
             renderCoord() {
                 const dias = ["","SEG","TER","QUA","QUI","SEX"];
                 document.getElementById('list-turmas').innerHTML = DB.data.turmas.map(t=>`<div class="eletiva-item"><span><b>${t.nome}</b> (${dias[t.dia]})</span> <div><button class="btn btn-outline" style="padding:5px 10px" onclick="App.editTurma(${t.id})">✏️</button><button class="btn btn-danger" style="padding:5px 10px; margin-left:5px" onclick="if(confirm('Excluir?')){DB.data.turmas=DB.data.turmas.filter(x=>x.id!=${t.id});DB.save();UI.renderCoord()}">🗑️</button></div></div>`).join('');
@@ -424,28 +442,23 @@
                 document.getElementById('p-turmas-check').innerHTML = DB.data.turmas.map(t=>`<div style="margin-bottom:5px"><input type="checkbox" class="t-check" value="${t.id}" style="width:auto; margin-right:8px"> ${t.nome}</div>`).join('');
                 document.getElementById('list-feriados').innerHTML = DB.data.feriados.map((f, i)=>`<div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:5px; border-bottom:1px solid #eee;">${f.data} - ${f.desc} <button onclick="DB.data.feriados.splice(${i},1);DB.save();UI.renderCoord()" style="border:none; color:red; cursor:pointer">✕</button></div>`).join('');
             },
-
             renderProf() {
                 document.getElementById('prof-turmas').innerHTML = session.user.turmas.map(tid=>{
                     const t = DB.data.turmas.find(x=>x.id==tid);
                     return t ? `<div class="eletiva-item" onclick="UI.openTurma(${t.id})"><div><b style="font-size:1.1rem">${t.nome}</b><br><small style="color:#64748b">Clique para gerenciar diário</small></div> <span style="font-size:1.5rem">➡️</span></div>` : '';
                 }).join('');
             },
-
             openTurma(id) { session.active = DB.data.turmas.find(x=>x.id==id); document.getElementById('active-title').innerText = session.active.nome; UI.nav('view-prof'); document.getElementById('prof-home').classList.add('hidden'); document.getElementById('prof-workspace').classList.remove('hidden'); App.loadWork(); },
             closeTurma() { document.getElementById('prof-home').classList.remove('hidden'); document.getElementById('prof-workspace').classList.add('hidden'); },
             tab(b, id) { document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden')); b.classList.add('active'); document.getElementById(id).classList.remove('hidden'); },
-
             genPDF(tipo) {
                 const area = document.getElementById('print-area');
                 const t = session.active;
                 const m = document.getElementById('sel-mes').value;
                 const nMes = ["","","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-                
                 const header = (periodo) => `<div class="print-header"><h1>EEMTI ANTONIO CUSTÓDIO DE MESQUITA</h1><p><b>DIÁRIO DE CLASSE - ELETIVAS 2026</b></p><p>PROFESSOR(A): ${session.user.nome.toUpperCase()} | DISCIPLINA: ${t.nome.toUpperCase()} | MÊS: ${periodo.toUpperCase()}</p></div>`;
                 const sigs = `<div style="display:flex; justify-content:space-around; margin-top:50px"><div style="border-top:1px solid #000; width:200px; text-align:center; font-size:9pt">Assinatura do Professor</div><div style="border-top:1px solid #000; width:200px; text-align:center; font-size:9pt">Coordenação Pedagógica</div></div>`;
                 const foot = `<div class="dev-footer">Sistema desenvolvido por José Cleiton Sousa Rodrigues | 2026 ©</div>`;
-
                 if(tipo === 'mensal') {
                     area.innerHTML = `<div class="page-break">${header(nMes[m])} <h3 style="text-align:center">CONTROLE DE FREQUÊNCIA</h3> <div id="pdf-f"></div> <br> <h3>PLANO DE AULA / ATIVIDADES:</h3> <div style="border:1px solid #000; padding:15px; min-height:200px; font-size:10pt">${DB.data.logs[`p_${t.id}_${m}`] || 'Nenhum relato registrado.'}</div> ${sigs} ${foot}</div>`;
                     App.renderFreq('pdf-f', t, m, true);
@@ -461,8 +474,8 @@
             }
         };
 
-        // Iniciar carregamento
-        DB.load();
+        // Iniciar
+        window.onload = () => DB.load();
     </script>
 </body>
 </html>
