@@ -120,9 +120,27 @@
 
         const API = {
             async call(endpoint, method = 'GET', body = null) {
-                const headers = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" };
-                const res = await fetch(`${SB_URL}/${endpoint}`, { method, headers, body: body ? JSON.stringify(body) : null });
-                return res.ok ? (res.status !== 204 ? res.json() : true) : null;
+        const headers = {
+            "apikey": SB_KEY,
+            "Authorization": `Bearer ${SB_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+        };
+
+        const res = await fetch(`${SB_URL}/${endpoint}`, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : null
+        });
+
+        if (!res.ok) {
+            const erro = await res.text();
+            console.error("Erro Supabase:", erro);
+            alert("Erro ao salvar. Veja o console.");
+            return null;
+        }
+
+        return res.status !== 204 ? res.json() : true;
             }
         };
 
@@ -146,13 +164,27 @@
             },
 
             async saveTurma() {
-                const obj = {
-                    id: parseInt(document.getElementById('edit-t-id').value) || Math.floor(Math.random() * 1000000),
-                    nome: document.getElementById('t-nome').value,
-                    dia_semana: parseInt(document.getElementById('t-dia').value),
-                    lista_alunos: document.getElementById('t-alunos').value.split('\n').filter(a => a.trim())
-                };
-                if(await API.call('turmas', 'POST', obj)) { alert("Salvo!"); this.init(); UI.clearT(); }
+    const nome = document.getElementById('t-nome').value;
+    const dia = document.getElementById('t-dia').value;
+    const alunos = document.getElementById('t-alunos').value;
+
+    if (!nome || !alunos) {
+        alert("Preencha os campos!");
+        return;
+    }
+
+    const obj = {
+        nome: nome,
+        dia_semana: parseInt(dia),
+        lista_alunos: alunos.split('\n').filter(a => a.trim())
+    };
+
+    const res = await API.call('turmas', 'POST', obj);
+
+    if (res) {
+        alert("Eletiva salva com sucesso!");
+        this.init();
+        UI.clearT();
             },
 
             async saveProf() {
@@ -223,3 +255,4 @@
     </script>
 </body>
 </html>
+
