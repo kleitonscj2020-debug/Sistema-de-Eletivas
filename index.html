@@ -251,64 +251,58 @@
         const DB = {
             data: { turmas: [], profs: [], logs: {}, feriados: [] },
             
-            async load() {
-                const status = document.getElementById('sync-status');
-                status.innerText = "⌛ Carregando...";
-                try {
-                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
-                        headers: { 
-                            'apikey': DB_CONFIG.key, 
-                            'Authorization': `Bearer ${DB_CONFIG.key}` 
-                        }
-                    });
-                    const res = await response.json();
-                    
-                    if (res && res.length > 0) {
-                        this.data = res[0].conteudo;
-                        status.innerText = "✅ Sincronizado";
-                    } else {
-                        status.innerText = "⚠️ Banco Vazio";
-                        // Tentativa de Migração: Busca dados do LocalStorage antigo
-                        const local = localStorage.getItem("acm_2026_data");
-                        if(local) {
-                            this.data = JSON.parse(local);
-                            status.innerText = "🚚 Migrando Local...";
-                            await this.save();
-                        }
-                    }
-                } catch (e) {
-                    console.error("Erro ao carregar:", e);
-                    status.innerText = "❌ Erro de Conexão";
-                    // Fallback para local se offline
-                    const local = localStorage.getItem("acm_2026_data");
-                    if(local) this.data = JSON.parse(local);
-                }
-                UI.renderCoord();
+           async load() {
+  const status = document.getElementById("sync-status");
+
+  try {
+    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
+      headers: {
+        "apikey": DB_CONFIG.key,
+        "Authorization": `Bearer ${DB_CONFIG.key}`
+      }
+    });
+
+    const res = await response.json();
+
+    if (res.length > 0) {
+      this.data = res[0].conteudo;
+      status.innerText = "✅ Dados carregados do banco";
+    } else {
+      this.data = {};
+      status.innerText = "⚠ Banco vazio";
+    }
+
+  } catch (error) {
+    status.innerText = "❌ Erro de conexão";
+    this.data = {};
+  }
+
+  UI.renderCoord();
+}
             },
 
-            async save() {
-                const status = document.getElementById('sync-status');
-                status.innerText = "☁️ Salvando...";
-                try {
-                    // Cache local por segurança
-                    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
+           async save() {
+  const status = document.getElementById("sync-status");
+  status.innerText = "💾 Salvando...";
 
-                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
-                        method: 'POST',
-                        headers: {
-                            'apikey': DB_CONFIG.key,
-                            'Authorization': `Bearer ${DB_CONFIG.key}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'resolution=merge-upsert'
-                        },
-                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
-                    });
-                    
-                    if(response.ok) status.innerText = "✅ Salvo";
-                    else throw new Error("Falha no servidor");
-                } catch (e) {
-                    console.error("Erro ao salvar:", e);
-                    status.innerText = "❌ Erro ao Salvar";
+  try {
+    await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
+      method: "POST",
+      headers: {
+        "apikey": DB_CONFIG.key,
+        "Authorization": `Bearer ${DB_CONFIG.key}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chave: "geral",
+        conteudo: this.data
+      })
+    });
+
+    status.innerText = "✅ Salvo no banco";
+
+  } catch (error) {
+    status.innerText = "❌ Erro ao salvar";
                 }
             }
         };
@@ -479,3 +473,4 @@
     </script>
 </body>
 </html>
+
