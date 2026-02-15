@@ -253,71 +253,75 @@
     
     async load() {
         const status = document.getElementById('sync-status');
-        if (status) status.innerText = "⌛ Carregando...";
+        if (status) status.innerText = "⌛ Sincronizando...";
         
         try {
+            // Busca direta pela chave 'geral'
             const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
+                method: 'GET',
                 headers: { 
                     'apikey': DB_CONFIG.key, 
-                    'Authorization': `Bearer ${DB_CONFIG.key}` 
+                    'Authorization': `Bearer ${DB_CONFIG.key}`,
+                    'Range': '0-9' 
                 }
             });
+            
             const res = await response.json();
             
-            if (res && res.length > 0 && res[0].conteudo) {
-                // Garantimos que turmas e profs sejam sempre arrays para não quebrar o .find() ou .map()
-                this.data = {
-                    turmas: res[0].conteudo.turmas || [],
-                    profs: res[0].conteudo.profs || [],
-                    logs: res[0].conteudo.logs || {},
-                    feriados: res[0].conteudo.feriados || []
-                };
-                if (status) status.innerText = "✅ Sincronizado";
+            if (res && res.length > 0) {
+                this.data = res[0].conteudo;
+                if (status) status.innerText = "✅ Banco Online";
+            } else {
+                // Se não achou no banco, tenta o local como reserva
+                const local = localStorage.getItem("acm_2026_data");
+                if(local) this.data = JSON.parse(local);
+                if (status) status.innerText = "⚠️ Usando Local (Banco Vazio)";
             }
         } catch (e) {
-            console.error("Erro ao carregar:", e);
-            if (status) status.innerText = "❌ Erro de Conexão";
-            const local = localStorage.getItem("acm_2026_data");
-            if(local) this.data = JSON.parse(local);
+            console.error("Erro Crítico Load:", e);
+            if (status) status.innerText = "❌ Erro de Link com Banco";
         }
-        
-        // Renderiza as listas para que os usuários apareçam no login/coordenação
         UI.renderCoord();
     },
 
     async save() {
         const status = document.getElementById('sync-status');
-    status.innerText = "☁️ Salvando...";
-    
-    // Backup local imediato
-    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
+        if (status) status.innerText = "🚀 Forçando Gravação...";
+        
+        // Sempre salva no PC primeiro para não perder nada
+        localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
 
-    try {
-        // Adicionamos ?on_conflict=chave para o Supabase saber qual coluna comparar
-        const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?on_conflict=chave`, {
-            method: 'POST',
-            headers: {
-                'apikey': DB_CONFIG.key,
-                'Authorization': `Bearer ${DB_CONFIG.key}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-upsert' 
-            },
-            body: JSON.stringify({ 
-                chave: 'geral', 
-                conteudo: this.data 
-            })
-        });
+        try {
+            // ESTRATÉGIA 1: UPSERT (Tenta criar ou atualizar)
+            const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas`, {
+                method: 'POST',
+                headers: {
+                    'apikey': DB_CONFIG.key,
+                    'Authorization': `Bearer ${DB_CONFIG.key}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'resolution=merge-upsert'
+                },
+                body: JSON.stringify({ chave: 'geral', conteudo: this.data })
+            });
 
-        if (response.ok) {
-            status.innerText = "✅ Salvo";
-        } else {
-            const erroTxt = await response.text();
-            console.error("Resposta do Banco:", erroTxt);
-            status.innerText = "❌ Erro de Resposta";
-        }
-    } catch (e) {
-        console.error("Erro de Conexão:", e);
-        status.innerText = "❌ Sem Internet/Erro";
+            // ESTRATÉGIA 2: Se o POST falhar, tenta o PATCH (Atualização Forçada)
+            if (!response.ok) {
+                console.log("Post falhou, tentando Patch de força bruta...");
+                await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': DB_CONFIG.key,
+                        'Authorization': `Bearer ${DB_CONFIG.key}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ conteudo: this.data })
+                });
+            }
+
+            if (status) status.innerText = "✅ Salvo na Nuvem!";
+        } catch (e) {
+            console.error("Erro Crítico Save:", e);
+            if (status) status.innerText = "❌ Falha de Comunicação";
                 }
             }
         };
@@ -506,6 +510,7 @@
     </script>
 </body>
 </html>
+
 
 
 
