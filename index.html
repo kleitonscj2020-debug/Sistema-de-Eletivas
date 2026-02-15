@@ -253,55 +253,63 @@
             
             async load() {
                 const status = document.getElementById('sync-status');
-    status.innerText = "⌛ Carregando...";
-
-    try {
-        const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
-            headers: { 
-                'apikey': DB_CONFIG.key,
-                'Authorization': `Bearer ${DB_CONFIG.key}`
-            }
-        });
-        const res = await response.json();
-
-        if (res && res.length > 0) {
-            this.data = res[0].conteudo;
-            status.innerText = "✅ Sincronizado com Supabase";
-        } else {
-            // Caso ainda não exista, cria a chave "geral" vazia
-            this.data = { turmas: [], profs: [], logs: {}, feriados: [] };
-            await this.save(); // salva direto no Supabase
-            status.innerText = "⚠️ Banco criado no Supabase";
-        }
-    } catch (e) {
-        console.error("Erro ao carregar:", e);
-        status.innerText = "❌ Erro de conexão com Supabase";
-        // NÃO usar LocalStorage mais
-    }
-    UI.renderCoord();
+                status.innerText = "⌛ Carregando...";
+                try {
+                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
+                        headers: { 
+                            'apikey': DB_CONFIG.key, 
+                            'Authorization': `Bearer ${DB_CONFIG.key}` 
+                        }
+                    });
+                    const res = await response.json();
+                    
+                    if (res && res.length > 0) {
+                        this.data = res[0].conteudo;
+                        status.innerText = "✅ Sincronizado";
+                    } else {
+                        status.innerText = "⚠️ Banco Vazio";
+                        // Tentativa de Migração: Busca dados do LocalStorage antigo
+                        const local = localStorage.getItem("acm_2026_data");
+                        if(local) {
+                            this.data = JSON.parse(local);
+                            status.innerText = "🚚 Migrando Local...";
+                            await this.save();
+                        }
+                    }
+                } catch (e) {
+                    console.error("Erro ao carregar:", e);
+                    status.innerText = "❌ Erro de Conexão";
+                    // Fallback para local se offline
+                    const local = localStorage.getItem("acm_2026_data");
+                    if(local) this.data = JSON.parse(local);
+                }
+                UI.renderCoord();
             },
 
             async save() {
                 const status = document.getElementById('sync-status');
-    status.innerText = "☁️ Salvando no Supabase...";
+                status.innerText = "☁️ Salvando...";
+                try {
+                    // Cache local por segurança
+                    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
 
-    try {
-        const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
-            method: 'POST',
-            headers: {
-                'apikey': DB_CONFIG.key,
-                'Authorization': `Bearer ${DB_CONFIG.key}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-upsert'
-            },
-            body: JSON.stringify({ chave: 'geral', conteudo: this.data })
-        });
-
-        if(response.ok) status.innerText = "✅ Salvo no Supabase";
-        else throw new Error("Falha no servidor Supabase");
-    } catch (e) {
-        console.error("Erro ao salvar:", e);
-        status.innerText = "❌ Erro ao salvar no Supabase";
+                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': DB_CONFIG.key,
+                            'Authorization': `Bearer ${DB_CONFIG.key}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'resolution=merge-upsert'
+                        },
+                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
+                    });
+                    
+                    if(response.ok) status.innerText = "✅ Salvo";
+                    else throw new Error("Falha no servidor");
+                } catch (e) {
+                    console.error("Erro ao salvar:", e);
+                    status.innerText = "❌ Erro ao Salvar";
+                }
             }
         };
 
@@ -313,41 +321,11 @@
             login() {
                 const u = document.getElementById('user').value;
                 const p = document.getElementById('pass').value;
-                login: async function() {
-    const u = document.getElementById('user').value.trim();
-    const p = document.getElementById('pass').value.trim();
-    const status = document.getElementById('sync-status');
-
-    if(!u || !p) return alert("Preencha usuário e senha!");
-
-    status.innerText = "⌛ Verificando credenciais...";
-
-    try {
-        // Filtra o professor pelo user e pass no DB.data (já carregado do Supabase)
-        await DB.load(); // garante que os dados estão atualizados
-        const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
-
-        if(prof) {
-            session.user = prof;
-            document.getElementById('prof-name').innerText = prof.nome;
-            UI.nav('view-prof');
-            UI.renderProf();
-            status.innerText = "✅ Login realizado!";
-        } else if(u === "coord") {
-            // Login do coordenador
-            if(p === "033") { // você pode mudar a senha real depois
-                UI.nav('view-coord');
-                UI.renderCoord();
-                status.innerText = "✅ Login do coordenador!";
-            } else alert("Senha incorreta.");
-        } else {
-            alert("Credenciais incorretas.");
-            status.innerText = "❌ Falha no login";
-        }
-    } catch (e) {
-        console.error(e);
-        alert("Erro ao conectar ao Supabase.");
-        status.innerText = "❌ Erro no login";
+                if(u==='23041811' && p==='1983') { UI.nav('view-coord'); UI.renderCoord(); }
+                else {
+                    const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
+                    if(prof) { session.user = prof; document.getElementById('prof-name').innerText = prof.nome; UI.nav('view-prof'); UI.renderProf(); }
+                    else alert("Credenciais incorretas.");
                 }
             },
 
@@ -501,6 +479,3 @@
     </script>
 </body>
 </html>
-
-
-
