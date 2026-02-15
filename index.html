@@ -250,10 +250,11 @@
         // --- GESTÃO DE DADOS ---
         const DB = {
             data: { turmas: [], profs: [], logs: {}, feriados: [] },
-
+    
     async load() {
         const status = document.getElementById('sync-status');
-        status.innerText = "⌛ Carregando...";
+        if (status) status.innerText = "⌛ Carregando...";
+        
         try {
             const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
                 headers: { 
@@ -263,26 +264,31 @@
             });
             const res = await response.json();
             
-            if (res && res.length > 0) {
-                this.data = res[0].conteudo;
-                status.innerText = "✅ Sincronizado";
+            if (res && res.length > 0 && res[0].conteudo) {
+                // Garantimos que turmas e profs sejam sempre arrays para não quebrar o .find() ou .map()
+                this.data = {
+                    turmas: res[0].conteudo.turmas || [],
+                    profs: res[0].conteudo.profs || [],
+                    logs: res[0].conteudo.logs || {},
+                    feriados: res[0].conteudo.feriados || []
+                };
+                if (status) status.innerText = "✅ Sincronizado";
             }
-            // Renderiza as telas após carregar
-            UI.renderCoord();
-            if(session.user) UI.renderProf(); 
         } catch (e) {
             console.error("Erro ao carregar:", e);
-            status.innerText = "❌ Erro de Conexão";
+            if (status) status.innerText = "❌ Erro de Conexão";
             const local = localStorage.getItem("acm_2026_data");
             if(local) this.data = JSON.parse(local);
         }
+        
+        // Renderiza as listas para que os usuários apareçam no login/coordenação
+        UI.renderCoord();
     },
 
     async save() {
         const status = document.getElementById('sync-status');
-        status.innerText = "☁️ Sincronizando...";
+        if (status) status.innerText = "☁️ Salvando...";
         
-        // Cache local imediato para evitar perda de dados por queda de rede
         localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
 
         try {
@@ -296,34 +302,9 @@
                 },
                 body: JSON.stringify({ chave: 'geral', conteudo: this.data })
             });
-            status.innerText = "✅ Salvo";
+            if (status) status.innerText = "✅ Salvo";
         } catch (e) {
-            status.innerText = "❌ Erro ao Salvar Cloud";
-            },
-
-            async save() {
-                const status = document.getElementById('sync-status');
-                status.innerText = "☁️ Salvando...";
-                try {
-                    // Cache local por segurança
-                    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
-
-                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
-                        method: 'POST',
-                        headers: {
-                            'apikey': DB_CONFIG.key,
-                            'Authorization': `Bearer ${DB_CONFIG.key}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'resolution=merge-upsert'
-                        },
-                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
-                    });
-                    
-                    if(response.ok) status.innerText = "✅ Salvo";
-                    else throw new Error("Falha no servidor");
-                } catch (e) {
-                    console.error("Erro ao salvar:", e);
-                    status.innerText = "❌ Erro ao Salvar";
+            if (status) status.innerText = "❌ Erro Cloud";
                 }
             }
         };
