@@ -293,7 +293,7 @@
                     // Cache local por segurança
                     localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
 
-                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
+                    fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, ...), {
                         method: 'POST',
                         headers: {
                             'apikey': DB_CONFIG.key,
@@ -479,4 +479,5 @@
     </script>
 </body>
 </html>
+
 
