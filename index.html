@@ -288,27 +288,35 @@
 
             async save() {
                 const status = document.getElementById('sync-status');
-                status.innerText = "☁️ Salvando...";
-                try {
-                    // Cache local por segurança
-                    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
+    status.innerText = "☁️ Salvando...";
+    try {
+        localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
 
-                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
-                        method: 'POST',
-                        headers: {
-                            'apikey': DB_CONFIG.key,
-                            'Authorization': `Bearer ${DB_CONFIG.key}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'resolution=merge-upsert'
-                        },
-                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
-                    });
-                    
-                    if(response.ok) status.innerText = "✅ Salvo";
-                    else throw new Error("Falha no servidor");
-                } catch (e) {
-                    console.error("Erro ao salvar:", e);
-                    status.innerText = "❌ Erro ao Salvar";
+        const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas`, {
+            method: 'POST',
+            headers: {
+                'apikey': DB_CONFIG.key,
+                'Authorization': `Bearer ${DB_CONFIG.key}`,
+                'Content-Type': 'application/json',
+                // Isso diz ao Supabase: "Se a chave 'geral' já existir, atualize-a"
+                'Prefer': 'resolution=merge-upsert' 
+            },
+            body: JSON.stringify({ 
+                chave: 'geral', 
+                conteudo: this.data 
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Erro do Supabase:", errorData);
+            throw new Error(errorData.message);
+        }
+
+        status.innerText = "✅ Salvo";
+    } catch (e) {
+        console.error("Erro ao salvar:", e);
+        status.innerText = "❌ Erro ao Salvar";
                 }
             }
         };
@@ -479,3 +487,4 @@
     </script>
 </body>
 </html>
+
