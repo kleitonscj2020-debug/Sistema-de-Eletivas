@@ -6,70 +6,43 @@
     <title>SISTEMA ELETIVAS 2026 | EEMTI ACM</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #064e3b; --primary-light: #10b981; --secondary: #0f172a;
-            --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #1e293b;
-        }
-
+        :root { --primary: #064e3b; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #1e293b; }
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { margin: 0; background-color: var(--bg); color: var(--text); }
         .hidden { display: none !important; }
-
-        /* Estilo da Navbar */
         .navbar { background: #0f172a; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .status-badge { background: #064e3b; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
-
+        .status-badge { background: #064e3b; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        
-        /* Layout Grid do seu Print */
-        .admin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
-        .list-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-
-        .card { background: var(--card); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card h3 { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; }
-        
-        input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: #fcfcfd; font-size: 0.9rem; }
-        
-        .btn { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; }
-        .btn-save { background: var(--primary); color: white; text-align: center; display: block; }
-        .btn-save:hover { background: #053e2f; }
-        .btn-logout { background: #fff1f2; color: #e11d48; width: auto; padding: 5px 15px; }
-
-        /* Listas */
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f5f9; }
-        .actions { display: flex; gap: 8px; }
-        .btn-mini { padding: 5px; background: none; border: 1px solid #e2e8f0; cursor: pointer; border-radius: 4px; }
-
-        /* Estilos de Tabela para Professor */
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
-        .sticky-col { position: sticky; left: 0; background: white; text-align: left; min-width: 200px; }
-        
-        @media print { .no-print { display: none !important; } .print-only { display: block !important; } }
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: var(--card); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: #fcfcfd; }
+        .btn { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-save { background: var(--primary); color: white; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; background: #fff; margin-bottom: 5px; border-radius: 8px; }
+        .actions button { cursor: pointer; border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; margin-left: 5px; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar no-print">
-        <div style="font-weight: 800; font-size: 1.2rem;">ELE<span>TIVAS ACM</span> <small style="color: var(--primary-light)">2026</small></div>
-        <div class="status-badge">✔ <span id="sync-text">Conectado</span></div>
+    <nav class="navbar">
+        <div style="font-weight: 800;">ELETIVAS ACM 2026</div>
+        <div class="status-badge" id="sync-status">Conectado</div>
     </nav>
 
     <div class="container">
-        
-        <section id="view-login" class="no-print">
-            <div style="max-width: 400px; margin: 10vh auto;" class="card">
-                <h2 style="text-align: center">Acesso ao Painel</h2>
+        <section id="view-login">
+            <div style="max-width: 400px; margin: 15vh auto;" class="card">
+                <h2 style="text-align: center">Painel de Acesso</h2>
                 <input id="user" type="text" placeholder="Usuário">
                 <input id="pass" type="password" placeholder="Senha">
                 <button class="btn btn-save" onclick="App.login()">Entrar</button>
             </div>
         </section>
 
-        <section id="view-admin" class="hidden no-print">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <section id="view-admin" class="hidden">
+            <div style="display:flex; justify-content:space-between; margin-bottom:2rem">
                 <h1>Painel Administrativo</h1>
-                <button class="btn-logout" onclick="location.reload()">Sair</button>
+                <button onclick="location.reload()" style="color:red; border:none; background:none; cursor:pointer">Sair</button>
             </div>
 
             <div class="admin-grid">
@@ -78,13 +51,11 @@
                     <input type="hidden" id="edit-t-id">
                     <input id="t-nome" placeholder="Nome da Disciplina">
                     <select id="t-dia">
-                        <option value="1">Segunda-feira</option>
-                        <option value="2">Terça-feira</option>
-                        <option value="3">Quarta-feira</option>
-                        <option value="4">Quinta-feira</option>
+                        <option value="1">Segunda-feira</option><option value="2">Terça-feira</option>
+                        <option value="3">Quarta-feira</option><option value="4">Quinta-feira</option>
                         <option value="5">Sexta-feira</option>
                     </select>
-                    <textarea id="t-alunos" rows="6" placeholder="Lista de Alunos (um por linha)"></textarea>
+                    <textarea id="t-alunos" rows="5" placeholder="Alunos (um por linha)"></textarea>
                     <button class="btn btn-save" onclick="App.saveTurma()">Salvar</button>
                 </div>
 
@@ -92,231 +63,125 @@
                     <h3>👤 Gerenciar Professor</h3>
                     <input type="hidden" id="edit-p-id">
                     <input id="p-nome" placeholder="Nome Completo">
-                    <div style="display: flex; gap: 10px;">
-                        <input id="p-user" placeholder="Usuário">
-                        <input id="p-pass" placeholder="Senha">
-                    </div>
-                    <label style="font-size: 0.8rem; font-weight: 700;">Vincular Eletivas:</label>
-                    <div id="p-turmas-check" style="max-height: 100px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; margin-bottom: 1rem; border-radius: 8px;">
-                        </div>
+                    <input id="p-user" placeholder="Usuário"><input id="p-pass" placeholder="Senha">
+                    <div id="p-turmas-check" style="max-height:100px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:10px"></div>
                     <button class="btn btn-save" onclick="App.saveProf()">Salvar</button>
                 </div>
 
                 <div class="card">
-                    <h3>📅 Bloqueios / Feriados</h3>
-                    <input type="date" id="f-data">
-                    <input id="f-desc" placeholder="Ex: Carnaval">
-                    <button class="btn btn-save" onclick="App.saveFeriado()">Adicionar Bloqueio</button>
-                    <div id="list-feriados" style="margin-top: 1rem; font-size: 0.8rem;"></div>
+                    <h3>📅 Feriados</h3>
+                    <input type="date" id="f-data"><input id="f-desc" placeholder="Motivo">
+                    <button class="btn btn-save" onclick="App.saveFeriado()">Adicionar</button>
+                    <div id="list-feriados" style="margin-top:10px"></div>
                 </div>
             </div>
 
-            <div class="list-grid">
-                <div class="card">
-                    <h3>📚 Eletivas Cadastradas</h3>
-                    <div id="list-turmas"></div>
-                </div>
-                <div class="card">
-                    <h3>👨‍🏫 Professores Cadastrados</h3>
-                    <div id="list-profs"></div>
-                </div>
+            <div class="admin-grid">
+                <div class="card"><h3>📚 Eletivas Cadastradas</h3><div id="list-turmas"></div></div>
+                <div class="card"><h3>👨‍🏫 Professores Cadastrados</h3><div id="list-profs"></div></div>
             </div>
         </section>
-
-        <section id="view-prof" class="hidden">
-            <div class="no-print">
-                <button class="btn-logout" onclick="UI.showProfHome()">Voltar</button>
-                <h1 id="prof-active-title"></h1>
-                <div class="card">
-                    <select id="sel-mes" onchange="App.loadDiary()" style="width: 200px">
-                        <option value="2">Fevereiro</option><option value="3" selected>Março</option>
-                        <option value="4">Abril</option><option value="5">Maio</option>
-                        <option value="6">Junho</option>
-                    </select>
-                    <div id="diary-render"></div>
-                    <button class="btn btn-save" style="margin-top: 1rem;" onclick="App.saveLogs()">Salvar Chamada e Notas</button>
-                </div>
-            </div>
-        </section>
-
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
-        const SB_URL = 'https://xsddhhowfptgulllxhwj.supabase.co';
+        const SB_URL = 'https://xsddhhowfptgulllxhwj.supabase.co/rest/v1';
         const SB_KEY = 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6';
 
-        let DATA = { turmas: [], profs: [], feriados: [], logs: {} };
+        let DATA = { turmas: [], profs: [], feriados: [] };
 
         const API = {
-            async headers() {
-                return { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" };
-            },
-            async fetch(table) {
-                const r = await fetch(`${SB_URL}/rest/v1/${table}?select=*`, { headers: await this.headers() });
-                return r.json();
-            },
-            async post(table, obj) {
-                const r = await fetch(`${SB_URL}/rest/v1/${table}`, { 
-                    method: 'POST', 
-                    headers: await this.headers(), 
-                    body: JSON.stringify(obj) 
-                });
-                return r.ok;
-            },
-            async delete(table, id, col='id') {
-                await fetch(`${SB_URL}/rest/v1/${table}?${col}=eq.${id}`, { 
-                    method: 'DELETE', 
-                    headers: await this.headers() 
-                });
+            async call(endpoint, method = 'GET', body = null) {
+                const headers = {
+                    "apikey": SB_KEY,
+                    "Authorization": `Bearer ${SB_KEY}`,
+                    "Content-Type": "application/json",
+                    "Prefer": "resolution=merge-duplicates"
+                };
+                try {
+                    const res = await fetch(`${SB_URL}/${endpoint}`, { method, headers, body: body ? JSON.stringify(body) : null });
+                    if (!res.ok) throw await res.json();
+                    return res.status !== 204 ? await res.json() : true;
+                } catch (e) {
+                    alert("Erro ao salvar: " + (e.message || "Verifique as permissões do banco."));
+                    return null;
+                }
             }
         };
 
         const App = {
             async init() {
                 const [t, p, f] = await Promise.all([
-                    API.fetch('turmas'),
-                    API.fetch('professores'),
-                    API.fetch('feriados')
+                    API.call('turmas?select=*'),
+                    API.call('professores?select=*'),
+                    API.call('feriados?select=*')
                 ]);
                 DATA.turmas = t || [];
                 DATA.profs = p || [];
                 DATA.feriados = f || [];
-                
-                const savedLogs = localStorage.getItem('acm_logs_2026');
-                if(savedLogs) DATA.logs = JSON.parse(savedLogs);
-
-                UI.renderAdmin();
+                UI.render();
             },
 
             login() {
-                const u = document.getElementById('user').value;
-                const p = document.getElementById('pass').value;
-                if(u === '23041811' && p === '1983') {
+                if (document.getElementById('user').value === '23041811' && document.getElementById('pass').value === '1983') {
                     UI.nav('view-admin');
-                } else {
-                    const prof = DATA.profs.find(x => x.usuario === u && x.senha === p);
-                    if(prof) {
-                        sessionStorage.setItem('prof', JSON.stringify(prof));
-                        UI.showProfHome();
-                    } else alert("Acesso inválido");
-                }
+                } else alert("Acesso inválido");
             },
 
             async saveTurma() {
-                const id = document.getElementById('edit-t-id').value || Date.now();
                 const obj = {
-                    id: parseInt(id),
+                    id: parseInt(document.getElementById('edit-t-id').value) || Math.floor(Date.now() / 1000),
                     nome: document.getElementById('t-nome').value,
                     dia_semana: parseInt(document.getElementById('t-dia').value),
                     lista_alunos: document.getElementById('t-alunos').value.split('\n').filter(a => a.trim())
                 };
-                if(await API.post('turmas', obj)) {
+                if (await API.call('turmas', 'POST', obj)) {
                     alert("Eletiva Salva!");
+                    UI.clearT();
                     this.init();
-                    UI.clearTForm();
                 }
             },
 
             async saveProf() {
-                const id = document.getElementById('edit-p-id').value || Date.now();
                 const tSel = Array.from(document.querySelectorAll('.t-check:checked')).map(c => parseInt(c.value));
                 const obj = {
-                    id: parseInt(id),
+                    id: parseInt(document.getElementById('edit-p-id').value) || Math.floor(Date.now() / 1000),
                     nome: document.getElementById('p-nome').value,
                     usuario: document.getElementById('p-user').value,
                     senha: document.getElementById('p-pass').value,
                     vinculos_turmas: tSel
                 };
-                if(await API.post('professores', obj)) {
+                if (await API.call('professores', 'POST', obj)) {
                     alert("Professor Salvo!");
-                    this.init();
-                    UI.clearPForm();
-                }
-            },
-
-            async saveFeriado() {
-                const obj = { 
-                    data: document.getElementById('f-data').value, 
-                    descricao: document.getElementById('f-desc').value 
-                };
-                if(await API.post('feriados', obj)) this.init();
-            },
-
-            async deleteItem(table, id, col='id') {
-                if(confirm("Deseja excluir?")) {
-                    await API.delete(table, id, col);
+                    UI.clearP();
                     this.init();
                 }
             }
         };
 
         const UI = {
-            nav(id) {
-                document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-                document.getElementById(id).classList.remove('hidden');
+            nav(id) { document.getElementById('view-login').classList.add('hidden'); document.getElementById(id).classList.remove('hidden'); },
+            render() {
+                document.getElementById('list-turmas').innerHTML = DATA.turmas.map(t => `<div class="item-row">${t.nome} <div><button onclick="UI.editT(${t.id})">✏️</button></div></div>`).join('');
+                document.getElementById('list-profs').innerHTML = DATA.profs.map(p => `<div class="item-row">${p.nome} <div><button onclick="UI.editP(${p.id})">✏️</button></div></div>`).join('');
+                document.getElementById('p-turmas-check').innerHTML = DATA.turmas.map(t => `<label style="display:block"><input type="checkbox" class="t-check" value="${t.id}"> ${t.nome}</label>`).join('');
             },
-
-            renderAdmin() {
-                // Listar Eletivas
-                document.getElementById('list-turmas').innerHTML = DATA.turmas.map(t => `
-                    <div class="item-row">
-                        <span>${t.nome}</span>
-                        <div class="actions">
-                            <button class="btn-mini" onclick="UI.editTurma(${t.id})">✏️</button>
-                            <button class="btn-mini" onclick="App.deleteItem('turmas', ${t.id})">🗑️</button>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Listar Professores
-                document.getElementById('list-profs').innerHTML = DATA.profs.map(p => `
-                    <div class="item-row">
-                        <span>${p.nome}</span>
-                        <div class="actions">
-                            <button class="btn-mini" onclick="UI.editProf(${p.id})">✏️</button>
-                            <button class="btn-mini" onclick="App.deleteItem('professores', ${p.id})">🗑️</button>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Checkbox no Professor
-                document.getElementById('p-turmas-check').innerHTML = DATA.turmas.map(t => `
-                    <label style="display:block; font-size:0.85rem">
-                        <input type="checkbox" class="t-check" value="${t.id}"> ${t.nome}
-                    </label>
-                `).join('');
-
-                // Feriados
-                document.getElementById('list-feriados').innerHTML = DATA.feriados.map(f => `
-                    <div class="item-row">
-                        <span>${f.data} - ${f.descricao}</span>
-                        <button onclick="App.deleteItem('feriados', '${f.data}', 'data')">✕</button>
-                    </div>
-                `).join('');
-            },
-
-            editTurma(id) {
+            editT(id) {
                 const t = DATA.turmas.find(x => x.id == id);
                 document.getElementById('edit-t-id').value = t.id;
                 document.getElementById('t-nome').value = t.nome;
                 document.getElementById('t-dia').value = t.dia_semana;
                 document.getElementById('t-alunos').value = t.lista_alunos.join('\n');
             },
-
-            editProf(id) {
+            editP(id) {
                 const p = DATA.profs.find(x => x.id == id);
                 document.getElementById('edit-p-id').value = p.id;
                 document.getElementById('p-nome').value = p.nome;
                 document.getElementById('p-user').value = p.usuario;
                 document.getElementById('p-pass').value = p.senha;
-                document.querySelectorAll('.t-check').forEach(c => {
-                    c.checked = p.vinculos_turmas.includes(parseInt(c.value));
-                });
+                document.querySelectorAll('.t-check').forEach(c => c.checked = p.vinculos_turmas.includes(parseInt(c.value)));
             },
-
-            clearTForm() { document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; document.getElementById('edit-t-id').value=''; },
-            clearPForm() { document.getElementById('p-nome').value=''; document.getElementById('p-user').value=''; document.getElementById('p-pass').value=''; }
+            clearT() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; },
+            clearP() { document.getElementById('edit-p-id').value=''; document.getElementById('p-nome').value=''; document.getElementById('p-user').value=''; document.getElementById('p-pass').value=''; }
         };
 
         window.onload = () => App.init();
