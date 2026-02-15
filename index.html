@@ -287,24 +287,37 @@
 
     async save() {
         const status = document.getElementById('sync-status');
-        if (status) status.innerText = "☁️ Salvando...";
-        
-        localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
+    status.innerText = "☁️ Salvando...";
+    
+    // Backup local imediato
+    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
 
-        try {
-            await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
-                method: 'POST',
-                headers: {
-                    'apikey': DB_CONFIG.key,
-                    'Authorization': `Bearer ${DB_CONFIG.key}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'resolution=merge-upsert'
-                },
-                body: JSON.stringify({ chave: 'geral', conteudo: this.data })
-            });
-            if (status) status.innerText = "✅ Salvo";
-        } catch (e) {
-            if (status) status.innerText = "❌ Erro Cloud";
+    try {
+        // Adicionamos ?on_conflict=chave para o Supabase saber qual coluna comparar
+        const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?on_conflict=chave`, {
+            method: 'POST',
+            headers: {
+                'apikey': DB_CONFIG.key,
+                'Authorization': `Bearer ${DB_CONFIG.key}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-upsert' 
+            },
+            body: JSON.stringify({ 
+                chave: 'geral', 
+                conteudo: this.data 
+            })
+        });
+
+        if (response.ok) {
+            status.innerText = "✅ Salvo";
+        } else {
+            const erroTxt = await response.text();
+            console.error("Resposta do Banco:", erroTxt);
+            status.innerText = "❌ Erro de Resposta";
+        }
+    } catch (e) {
+        console.error("Erro de Conexão:", e);
+        status.innerText = "❌ Sem Internet/Erro";
                 }
             }
         };
@@ -493,5 +506,6 @@
     </script>
 </body>
 </html>
+
 
 
