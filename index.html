@@ -321,7 +321,7 @@
             login() {
                 const u = document.getElementById('user').value;
                 const p = document.getElementById('pass').value;
-                if(u==='23041811' && p==='1983') { UI.nav('view-coord'); UI.renderCoord(); }
+                if(u==='coord' && p==='033') { UI.nav('view-coord'); UI.renderCoord(); }
                 else {
                     const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
                     if(prof) { session.user = prof; document.getElementById('prof-name').innerText = prof.nome; UI.nav('view-prof'); UI.renderProf(); }
@@ -479,3 +479,4 @@
     </script>
 </body>
 </html>
+
