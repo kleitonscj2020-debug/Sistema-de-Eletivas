@@ -4,37 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISTEMA ELETIVAS 2026 | EEMTI ACM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #064e3b; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #1e293b; }
+        :root { --primary: #064e3b; --secondary: #0f172a; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; }
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { margin: 0; background-color: var(--bg); color: var(--text); }
+        body { margin: 0; background: var(--bg); color: #1e293b; }
         .hidden { display: none !important; }
-        .navbar { background: #0f172a; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .status-badge { background: #064e3b; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; }
+        .navbar { background: var(--secondary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .card { background: var(--card); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: #fcfcfd; }
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: var(--card); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); }
         .btn { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; }
         .btn-save { background: var(--primary); color: white; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; background: #fff; margin-bottom: 5px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 0.8rem; }
-        @media print { .no-print { display: none !important; } .print-only { display: block !important; } }
+        .btn-save:hover { opacity: 0.9; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .check-btn { width: 30px; height: 30px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; font-weight: bold; }
+        .p-absent { background: #fee2e2; color: #b91c1c; }
+        .p-present { background: #dcfce7; color: #15803d; }
+        @media print { .no-print { display: none !important; } .card { border: none; box-shadow: none; } }
     </style>
 </head>
 <body>
 
     <nav class="navbar no-print">
         <div style="font-weight: 800;">ELETIVAS ACM 2026</div>
-        <div class="status-badge" id="sync-status">Conectado</div>
+        <div id="sync-status" style="background:var(--primary); padding:4px 10px; border-radius:4px; font-size:0.8rem;">Conectado</div>
     </nav>
 
     <div class="container">
         <section id="view-login" class="no-print">
-            <div style="max-width: 400px; margin: 15vh auto;" class="card">
-                <h2 style="text-align: center">Acesso ao Sistema</h2>
+            <div style="max-width: 400px; margin: 10vh auto;" class="card">
+                <h2 style="text-align: center">Acesso ao Painel</h2>
                 <input id="user" type="text" placeholder="Usuário">
                 <input id="pass" type="password" placeholder="Senha">
                 <button class="btn btn-save" onclick="App.login()">Entrar</button>
@@ -42,9 +45,9 @@
         </section>
 
         <section id="view-admin" class="hidden no-print">
-            <div style="display:flex; justify-content:space-between; margin-bottom:2rem">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem">
                 <h1>Painel Administrativo</h1>
-                <button onclick="location.reload()" style="color:red; border:none; background:none; cursor:pointer">Sair</button>
+                <button onclick="location.reload()" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold">Sair</button>
             </div>
 
             <div class="admin-grid">
@@ -58,54 +61,54 @@
                         <option value="5">Sexta-feira</option>
                     </select>
                     <textarea id="t-alunos" rows="5" placeholder="Alunos (um por linha)"></textarea>
-                    <button class="btn btn-save" onclick="App.saveTurma()">Salvar Eletiva</button>
+                    <button class="btn btn-save" onclick="App.save('turmas')">Salvar Eletiva</button>
                 </div>
 
                 <div class="card">
                     <h3>👤 Gerenciar Professor</h3>
                     <input type="hidden" id="edit-p-id">
                     <input id="p-nome" placeholder="Nome Completo">
-                    <input id="p-user" placeholder="Usuário"><input id="p-pass" placeholder="Senha">
+                    <input id="p-user" placeholder="Usuário">
+                    <input id="p-pass" placeholder="Senha">
                     <div id="p-turmas-check" style="max-height:100px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:10px"></div>
-                    <button class="btn btn-save" onclick="App.saveProf()">Salvar Professor</button>
+                    <button class="btn btn-save" onclick="App.save('professores')">Salvar Professor</button>
                 </div>
 
                 <div class="card">
                     <h3>📅 Feriados</h3>
-                    <input type="date" id="f-data">
-                    <input id="f-desc" placeholder="Motivo">
-                    <button class="btn btn-save" onclick="App.saveFeriado()">Adicionar</button>
-                    <div id="list-feriados" style="margin-top:10px"></div>
+                    <input type="date" id="f-data"><input id="f-desc" placeholder="Motivo">
+                    <button class="btn btn-save" onclick="App.save('feriados')">Adicionar Feriado</button>
+                    <div id="list-feriados" style="margin-top:10px; max-height:100px; overflow-y:auto"></div>
                 </div>
             </div>
 
             <div class="admin-grid">
-                <div class="card"><h3>📚 Eletivas Cadastradas</h3><div id="list-turmas"></div></div>
-                <div class="card"><h3>👨‍🏫 Professores Cadastrados</h3><div id="list-profs"></div></div>
+                <div class="card"><h3>📚 Eletivas</h3><div id="list-turmas"></div></div>
+                <div class="card"><h3>👨‍🏫 Professores</h3><div id="list-profs"></div></div>
             </div>
         </section>
 
         <section id="view-prof" class="hidden">
             <div id="prof-home" class="no-print">
                 <h1 id="prof-welcome"></h1>
-                <div id="prof-turmas-grid" class="admin-grid"></div>
-                <button class="btn" onclick="location.reload()" style="margin-top:20px">Sair</button>
+                <div id="prof-turmas-list" class="admin-grid"></div>
+                <button class="btn" onclick="location.reload()">Sair</button>
             </div>
 
-            <div id="prof-diary" class="hidden">
+            <div id="prof-workspace" class="hidden">
                 <div class="no-print" style="display:flex; justify-content:space-between; margin-bottom:1rem">
-                    <button onclick="UI.backToProfHome()">← Voltar</button>
-                    <h2 id="diary-title"></h2>
-                    <button class="btn-save" style="padding:5px 15px; width:auto" onclick="window.print()">Imprimir</button>
+                    <button onclick="UI.backToProf()">← Voltar</button>
+                    <h2 id="active-title"></h2>
+                    <button class="btn-save" style="width:auto; padding:5px 20px" onclick="window.print()">Imprimir</button>
                 </div>
                 <div class="card">
-                    <select id="sel-mes" onchange="App.loadDiary()">
+                    <select id="sel-mes" onchange="App.renderDiary()" style="width:200px">
                         <option value="2">Fevereiro</option><option value="3" selected>Março</option>
                         <option value="4">Abril</option><option value="5">Maio</option>
                         <option value="6">Junho</option>
                     </select>
-                    <div id="diary-content" style="overflow-x:auto"></div>
-                    <button class="btn btn-save" style="margin-top:20px" onclick="App.persistDiary()">Salvar Chamada</button>
+                    <div id="diary-container" style="overflow-x:auto"></div>
+                    <button class="btn btn-save" style="margin-top:20px" onclick="App.persistLogs()">Salvar Alterações do Diário</button>
                 </div>
             </div>
         </section>
@@ -116,135 +119,129 @@
         const SB_KEY = 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6';
 
         let DATA = { turmas: [], profs: [], feriados: [], logs: {} };
-        let activeTurma = null;
+        let session = { user: null, tActive: null };
 
         const API = {
-            async call(endpoint, method = 'GET', body = null) {
-        const headers = {
-            "apikey": SB_KEY,
-            "Authorization": `Bearer ${SB_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=representation"
-        };
-
-        const res = await fetch(`${SB_URL}/${endpoint}`, {
-            method,
-            headers,
-            body: body ? JSON.stringify(body) : null
-        });
-
-        if (!res.ok) {
-            const erro = await res.text();
-            console.error("Erro Supabase:", erro);
-            alert("Erro ao salvar. Veja o console.");
-            return null;
-        }
-
-        return res.status !== 204 ? res.json() : true;
+            async req(end, meth = 'GET', body = null) {
+                const h = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" };
+                const res = await fetch(`${SB_URL}/${end}`, { method: meth, headers: h, body: body ? JSON.stringify(body) : null });
+                if(!res.ok) { const err = await res.json(); alert("Erro: " + err.message); return null; }
+                return res.status !== 204 ? await res.json() : true;
             }
         };
 
         const App = {
             async init() {
-                const [t, p, f] = await Promise.all([API.call('turmas?select=*'), API.call('professores?select=*'), API.call('feriados?select=*')]);
+                const [t, p, f] = await Promise.all([API.req('turmas?select=*'), API.req('professores?select=*'), API.req('feriados?select=*')]);
                 DATA.turmas = t || []; DATA.profs = p || []; DATA.feriados = f || [];
-                const saved = localStorage.getItem('acm_logs_26');
+                const saved = localStorage.getItem('acm_logs');
                 if(saved) DATA.logs = JSON.parse(saved);
                 UI.renderAdmin();
             },
 
-            async login() {
-                const u = document.getElementById('user').value;
-                const p = document.getElementById('pass').value;
+            login() {
+                const u = document.getElementById('user').value, p = document.getElementById('pass').value;
                 if(u === '23041811' && p === '1983') UI.nav('view-admin');
                 else {
                     const prof = DATA.profs.find(x => x.usuario === u && x.senha === p);
-                    if(prof) UI.showProf(prof); else alert("Erro!");
+                    if(prof) { session.user = prof; UI.showProfHome(); } else alert("Acesso negado!");
                 }
             },
 
-            async saveTurma() {
-    const nome = document.getElementById('t-nome').value;
-    const dia = document.getElementById('t-dia').value;
-    const alunos = document.getElementById('t-alunos').value;
+            async save(type) {
+                let obj = {}, table = type;
+                if(type === 'turmas') {
+                    obj = {
+                        id: parseInt(document.getElementById('edit-t-id').value) || Date.now(),
+                        nome: document.getElementById('t-nome').value,
+                        dia_semana: parseInt(document.getElementById('t-dia').value),
+                        lista_alunos: document.getElementById('t-alunos').value.split('\n').filter(a => a.trim())
+                    };
+                } else if(type === 'professores') {
+                    obj = {
+                        id: parseInt(document.getElementById('edit-p-id').value) || Date.now(),
+                        nome: document.getElementById('p-nome').value,
+                        usuario: document.getElementById('p-user').value,
+                        senha: document.getElementById('p-pass').value,
+                        vinculos_turmas: Array.from(document.querySelectorAll('.t-check:checked')).map(c => parseInt(c.value))
+                    };
+                } else if(type === 'feriados') {
+                    obj = { data: document.getElementById('f-data').value, descricao: document.getElementById('f-desc').value };
+                }
 
-    if (!nome || !alunos) {
-        alert("Preencha os campos!");
-        return;
-    }
-
-    const obj = {
-        nome: nome,
-        dia_semana: parseInt(dia),
-        lista_alunos: alunos.split('\n').filter(a => a.trim())
-    };
-
-    const res = await API.call('turmas', 'POST', obj);
-
-    if (res) {
-        alert("Eletiva salva com sucesso!");
-        this.init();
-        UI.clearT();
+                if(await API.req(table, 'POST', obj)) {
+                    alert("Salvo com sucesso!");
+                    this.init();
+                    if(type === 'turmas') UI.clearT(); else if(type === 'professores') UI.clearP();
+                }
             },
 
-            async saveProf() {
-                const obj = {
-                    id: parseInt(document.getElementById('edit-p-id').value) || Math.floor(Math.random() * 1000000),
-                    nome: document.getElementById('p-nome').value,
-                    usuario: document.getElementById('p-user').value,
-                    senha: document.getElementById('p-pass').value,
-                    vinculos_turmas: Array.from(document.querySelectorAll('.t-check:checked')).map(c => parseInt(c.value))
-                };
-                if(await API.call('professores', 'POST', obj)) { alert("Salvo!"); this.init(); UI.clearP(); }
+            async delete(table, id, col='id') {
+                if(confirm("Excluir?")) {
+                    await fetch(`${SB_URL}/${table}?${col}=eq.${id}`, { method: 'DELETE', headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` } });
+                    this.init();
+                }
             },
 
-            loadDiary() {
-                const m = document.getElementById('sel-mes').value;
+            renderDiary() {
+                const t = session.tActive, m = document.getElementById('sel-mes').value;
                 const daysInMonth = new Date(2026, m, 0).getDate();
                 let cols = [];
                 for(let i=1; i<=daysInMonth; i++) {
-                    if(new Date(2026, m-1, i).getDay() == activeTurma.dia_semana) cols.push(i);
+                    const dt = new Date(2026, m-1, i);
+                    if(dt.getDay() == t.dia_semana) {
+                        const iso = dt.toISOString().split('T')[0];
+                        const fer = DATA.feriados.find(f => f.data === iso);
+                        cols.push({ d: i, fer: fer ? fer.descricao : null });
+                    }
                 }
-                let h = `<table><tr><th>Aluno</th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
-                activeTurma.lista_alunos.forEach((aln, idx) => {
+
+                let h = `<table><tr><th>Aluno</th>${cols.map(c => `<th>${c.d}</th>`).join('')}<th>F</th></tr>`;
+                t.lista_alunos.forEach((aln, idx) => {
+                    let faltas = 0;
                     h += `<tr><td style="text-align:left">${aln}</td>`;
-                    cols.forEach(d => {
-                        const key = `f_${activeTurma.id}_${m}_${idx}_${d}`;
+                    cols.forEach(c => {
+                        const key = `f_${t.id}_${m}_${idx}_${c.d}`;
                         const isF = DATA.logs[key] === 'F';
-                        h += `<td onclick="App.toggleF('${key}')" style="cursor:pointer; background:${isF?'#fee2e2':'#dcfce7'}">${isF?'F':'P'}</td>`;
+                        if(c.fer) h += `<td style="background:#eee; font-size:0.6rem">${c.fer}</td>`;
+                        else {
+                            if(isF) faltas += 2;
+                            h += `<td><button class="check-btn ${isF?'p-absent':'p-present'}" onclick="App.toggleF('${key}')">${isF?'F':'P'}</button></td>`;
+                        }
                     });
-                    h += `</tr>`;
+                    h += `<td style="color:red; font-weight:bold">${faltas}</td></tr>`;
                 });
-                document.getElementById('diary-content').innerHTML = h + `</table>`;
+                document.getElementById('diary-container').innerHTML = h + `</table>`;
             },
 
-            toggleF(k) { DATA.logs[k] = DATA.logs[k] === 'F' ? 'P' : 'F'; this.loadDiary(); },
-            persistDiary() { localStorage.setItem('acm_logs_26', JSON.stringify(DATA.logs)); alert("Salvo localmente!"); }
+            toggleF(k) { DATA.logs[k] = DATA.logs[k] === 'F' ? 'P' : 'F'; this.renderDiary(); },
+            persistLogs() { localStorage.setItem('acm_logs', JSON.stringify(DATA.logs)); alert("Diário salvo!"); }
         };
 
         const UI = {
             nav(id) { document.querySelectorAll('section').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); },
             renderAdmin() {
-                document.getElementById('list-turmas').innerHTML = DATA.turmas.map(t => `<div class="item-row">${t.nome} <button onclick="UI.editT(${t.id})">✏️</button></div>`).join('');
-                document.getElementById('list-profs').innerHTML = DATA.profs.map(p => `<div class="item-row">${p.nome} <button onclick="UI.editP(${p.id})">✏️</button></div>`).join('');
+                document.getElementById('list-turmas').innerHTML = DATA.turmas.map(t => `<div class="item-row">${t.nome} <div><button onclick="UI.editT(${t.id})">✏️</button><button onclick="App.delete('turmas',${t.id})">🗑️</button></div></div>`).join('');
+                document.getElementById('list-profs').innerHTML = DATA.profs.map(p => `<div class="item-row">${p.nome} <div><button onclick="UI.editP(${p.id})">✏️</button><button onclick="App.delete('professores',${p.id})">🗑️</button></div></div>`).join('');
                 document.getElementById('p-turmas-check').innerHTML = DATA.turmas.map(t => `<label style="display:block"><input type="checkbox" class="t-check" value="${t.id}"> ${t.nome}</label>`).join('');
+                document.getElementById('list-feriados').innerHTML = DATA.feriados.map(f => `<div class="item-row">${f.data} <button onclick="App.delete('feriados','${f.data}','data')">✕</button></div>`).join('');
             },
-            showProf(p) {
+            showProfHome() {
                 UI.nav('view-prof');
-                document.getElementById('prof-welcome').innerText = "Olá, " + p.nome;
-                document.getElementById('prof-turmas-grid').innerHTML = p.vinculos_turmas.map(tid => {
+                document.getElementById('prof-welcome').innerText = "Olá, " + session.user.nome;
+                document.getElementById('prof-turmas-list').innerHTML = session.user.vinculos_turmas.map(tid => {
                     const t = DATA.turmas.find(x => x.id == tid);
-                    return t ? `<div class="card" onclick="UI.openDiary(${t.id})" style="cursor:pointer"><h3>${t.nome}</h3><p>Clique para abrir</p></div>` : '';
+                    return t ? `<div class="card" onclick="UI.openDiary(${t.id})" style="cursor:pointer"><h3>${t.nome}</h3><p>Abrir Diário</p></div>` : '';
                 }).join('');
             },
             openDiary(tid) {
-                activeTurma = DATA.turmas.find(x => x.id == tid);
-                document.getElementById('diary-title').innerText = activeTurma.nome;
+                session.tActive = DATA.turmas.find(x => x.id == tid);
+                document.getElementById('active-title').innerText = session.tActive.nome;
                 document.getElementById('prof-home').classList.add('hidden');
-                document.getElementById('prof-diary').classList.remove('hidden');
-                App.loadDiary();
+                document.getElementById('prof-workspace').classList.remove('hidden');
+                App.renderDiary();
             },
-            backToProfHome() { document.getElementById('prof-home').classList.remove('hidden'); document.getElementById('prof-diary').classList.add('hidden'); },
+            backToProf() { document.getElementById('prof-home').classList.remove('hidden'); document.getElementById('prof-workspace').classList.add('hidden'); },
             editT(id) { const t = DATA.turmas.find(x => x.id == id); document.getElementById('edit-t-id').value=t.id; document.getElementById('t-nome').value=t.nome; document.getElementById('t-alunos').value=t.lista_alunos.join('\n'); },
             editP(id) { const p = DATA.profs.find(x => x.id == id); document.getElementById('edit-p-id').value=p.id; document.getElementById('p-nome').value=p.nome; document.getElementById('p-user').value=p.usuario; document.getElementById('p-pass').value=p.senha; },
             clearT() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; },
@@ -255,4 +252,3 @@
     </script>
 </body>
 </html>
-
