@@ -207,74 +207,126 @@
     </div>
 
     <script>
+        // --- CONFIGURAÇÃO SUPABASE ---
         const DB_CONFIG = {
             url: 'https://xsddhhowfptgulllxhwj.supabase.co',
-            key: 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6'
+            key: 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6' 
         };
 
+        // --- VARIÁVEIS DE SESSÃO ---
+        let session = { user: null, active: null };
+
+        // --- GESTÃO DE DADOS (BANCO SQL) ---
         const DB = {
             data: { turmas: [], profs: [], logs: {}, feriados: [] },
             
             async load() {
                 const status = document.getElementById("sync-status");
                 try {
-                    const [rT, rP, rF] = await Promise.all([
+                    const [resT, resP, resF] = await Promise.all([
                         this.fetchTable('turmas'),
                         this.fetchTable('professores'),
                         this.fetchTable('feriados')
                     ]);
-                    this.data.turmas = rT || [];
-                    this.data.profs = (rP || []).map(p => ({
-                        id: p.id, nome: p.nome, user: p.usuario, pass: p.senha, turmas: p.vinculos_turmas || []
+
+                    // Mapeia Turmas (lista_alunos do SQL -> alunos do JS)
+                    this.data.turmas = (resT || []).map(t => ({
+                        id: t.id,
+                        nome: t.nome,
+                        dia: t.dia_semana,
+                        alunos: t.lista_alunos || []
                     }));
-                    this.data.feriados = (rF || []).map(f => ({
-                        data: f.data, desc: f.descricao
+
+                    // Mapeia Professores (usuario/senha do SQL -> user/pass do JS)
+                    this.data.profs = (resP || []).map(p => ({
+                        id: p.id,
+                        nome: p.nome,
+                        user: p.usuario,
+                        pass: p.senha,
+                        turmas: p.vinculos_turmas || []
                     }));
+
+                    // Mapeia Feriados
+                    this.data.feriados = (resF || []).map(f => ({
+                        data: f.data,
+                        desc: f.descricao
+                    }));
+
                     status.innerText = "✅ Sincronizado";
+                    UI.renderCoord();
                 } catch (e) {
+                    console.error("Erro ao carregar:", e);
                     status.innerText = "❌ Erro Conexão";
                 }
-                UI.renderCoord();
             },
 
-            async fetchTable(name) {
-                const r = await fetch(`${DB_CONFIG.url}/rest/v1/${name}?select=*`, {
+            async fetchTable(tableName) {
+                const r = await fetch(`${DB_CONFIG.url}/rest/v1/${tableName}?select=*`, {
                     headers: { "apikey": DB_CONFIG.key, "Authorization": `Bearer ${DB_CONFIG.key}` }
                 });
                 return r.json();
             },
 
+            // FUNÇÃO QUE VOCÊ PEDIU PARA REATIVAR E CORRIGIR
             async save() {
                 const status = document.getElementById("sync-status");
                 status.innerText = "💾 Salvando...";
+                
                 try {
+                    // 1. Salvar Turmas
                     for (const t of this.data.turmas) {
-                        await this.upsert('turmas', { id: t.id, nome: t.nome, dia_semana: parseInt(t.dia), lista_alunos: t.alunos });
+                        await this.upsert('turmas', { 
+                            id: t.id, 
+                            nome: t.nome, 
+                            dia_semana: parseInt(t.dia), 
+                            lista_alunos: t.alunos 
+                        });
                     }
+
+                    // 2. Salvar Professores
                     for (const p of this.data.profs) {
-                        await this.upsert('professores', { id: p.id, nome: p.nome, usuario: p.user, senha: p.pass, vinculos_turmas: p.turmas });
+                        await this.upsert('professores', { 
+                            id: p.id, 
+                            nome: p.nome, 
+                            usuario: p.user, 
+                            senha: p.pass, 
+                            vinculos_turmas: p.turmas 
+                        });
                     }
+
+                    // 3. Salvar Feriados
                     for (const f of this.data.feriados) {
-                        await this.upsert('feriados', { data: f.data, descricao: f.desc });
+                        await this.upsert('feriados', { 
+                            data: f.data, 
+                            descricao: f.desc 
+                        });
                     }
-                    status.innerText = "✅ Gravado";
-                } catch (e) {
-                    status.innerText = "❌ Erro ao Gravar";
+
+                    status.innerText = "✅ Dados Salvos";
+                } catch (error) {
+                    console.error("Erro ao salvar:", error);
+                    status.innerText = "❌ Falha ao Salvar";
+                    alert("Erro ao gravar no banco. Verifique a conexão.");
                 }
             },
 
             async upsert(table, payload) {
-                return fetch(`${DB_CONFIG.url}/rest/v1/${table}`, {
+                const response = await fetch(`${DB_CONFIG.url}/rest/v1/${table}`, {
                     method: "POST",
                     headers: {
-                        "apikey": DB_CONFIG.key, "Authorization": `Bearer ${DB_CONFIG.key}`,
-                        "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"
+                        "apikey": DB_CONFIG.key,
+                        "Authorization": `Bearer ${DB_CONFIG.key}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "resolution=merge-duplicates"
                     },
                     body: JSON.stringify(payload)
                 });
+                if (!response.ok) throw new Error("Erro no Upsert");
+                return response;
             },
 
             async delete(table, col, val) {
+                if(!confirm("Tem certeza que deseja excluir?")) return;
                 await fetch(`${DB_CONFIG.url}/rest/v1/${table}?${col}=eq.${val}`, {
                     method: "DELETE",
                     headers: { "apikey": DB_CONFIG.key, "Authorization": `Bearer ${DB_CONFIG.key}` }
@@ -283,6 +335,7 @@
             }
         };
 
+        // --- LÓGICA DO APLICATIVO ---
         window.App = {
             login() {
                 const u = document.getElementById('user').value;
@@ -291,44 +344,100 @@
                 else {
                     const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
                     if(prof) { session.user = prof; document.getElementById('prof-name').innerText = prof.nome; UI.nav('view-prof'); UI.renderProf(); }
-                    else alert("Erro!");
+                    else alert("Usuário ou senha inválidos.");
                 }
             },
+
             saveTurma() {
-                const id = document.getElementById('edit-t-id').value;
+                const idInput = document.getElementById('edit-t-id').value;
                 const nome = document.getElementById('t-nome').value;
                 const dia = document.getElementById('t-dia').value;
-                const alunos = document.getElementById('t-alunos').value.split('\n').filter(a => a.trim()).sort();
-                if(id) { const idx = DB.data.turmas.findIndex(t => t.id == id); DB.data.turmas[idx] = { id: Number(id), nome, dia, alunos }; }
-                else { DB.data.turmas.push({ id: Date.now(), nome, dia, alunos }); }
-                DB.save(); UI.resetTForm(); UI.renderCoord();
+                const lista = document.getElementById('t-alunos').value.split('\n').filter(a => a.trim()).sort();
+                
+                if(!nome) return alert("Nome é obrigatório");
+
+                if(idInput) {
+                    const idx = DB.data.turmas.findIndex(t => t.id == idInput);
+                    DB.data.turmas[idx] = { id: Number(idInput), nome, dia, alunos: lista };
+                } else {
+                    DB.data.turmas.push({ id: Date.now(), nome, dia, alunos: lista });
+                }
+                
+                DB.save(); 
+                UI.resetTForm(); 
+                UI.renderCoord();
             },
+
             saveProf() {
-                const id = document.getElementById('edit-p-id').value;
+                const idInput = document.getElementById('edit-p-id').value;
                 const nome = document.getElementById('p-nome').value;
+                const user = document.getElementById('p-user').value;
+                const pass = document.getElementById('p-pass').value;
                 const tIds = Array.from(document.querySelectorAll('.t-check:checked')).map(c => c.value);
-                const obj = { id: id ? Number(id) : Date.now(), nome, user: document.getElementById('p-user').value, pass: document.getElementById('p-pass').value, turmas: tIds };
-                if(id) { const idx = DB.data.profs.findIndex(p => p.id == id); DB.data.profs[idx] = obj; }
-                else { DB.data.profs.push(obj); }
-                DB.save(); UI.resetPForm(); UI.renderCoord();
+
+                if(!nome || !user || !pass) return alert("Preencha todos os campos");
+
+                const obj = { id: idInput ? Number(idInput) : Date.now(), nome, user, pass, turmas: tIds };
+                
+                if(idInput) {
+                    const idx = DB.data.profs.findIndex(p => p.id == idInput);
+                    DB.data.profs[idx] = obj;
+                } else {
+                    DB.data.profs.push(obj);
+                }
+                
+                DB.save(); 
+                UI.resetPForm(); 
+                UI.renderCoord();
             },
+
+            editTurma(id) {
+                const t = DB.data.turmas.find(x => x.id == id);
+                document.getElementById('edit-t-id').value = t.id;
+                document.getElementById('t-nome').value = t.nome;
+                document.getElementById('t-dia').value = t.dia;
+                document.getElementById('t-alunos').value = t.alunos.join('\n');
+                document.getElementById('t-form-title').innerText = "✏️ Editando Disciplina";
+                document.getElementById('t-cancel').classList.remove('hidden');
+            },
+
+            editProf(id) {
+                const p = DB.data.profs.find(x => x.id == id);
+                document.getElementById('edit-p-id').value = p.id;
+                document.getElementById('p-nome').value = p.nome;
+                document.getElementById('p-user').value = p.user;
+                document.getElementById('p-pass').value = p.pass;
+                document.querySelectorAll('.t-check').forEach(c => c.checked = p.turmas.includes(c.value));
+                document.getElementById('p-form-title').innerText = "✏️ Editando Professor";
+                document.getElementById('p-cancel').classList.remove('hidden');
+            },
+
             saveFeriado() {
-                const d = document.getElementById('f-data').value;
-                if(d) { DB.data.feriados.push({ data: d, desc: document.getElementById('f-desc').value }); DB.save(); UI.renderCoord(); }
+                const data = document.getElementById('f-data').value;
+                const desc = document.getElementById('f-desc').value;
+                if(data) {
+                    DB.data.feriados.push({ data, desc: desc || "Feriado" });
+                    DB.save();
+                    UI.renderCoord();
+                }
             },
+
             loadWork() {
-                const t = session.active; const m = document.getElementById('sel-mes').value;
+                const t = session.active; 
+                const m = document.getElementById('sel-mes').value;
                 this.renderFreq('render-f', t, m, false);
                 this.renderNotes('render-n', t, false);
                 document.getElementById('plano-txt').value = DB.data.logs[`p_${t.id}_${m}`] || '';
             },
+
             renderFreq(tid, t, m, isP) {
                 const diasNoMes = new Date(2026, m, 0).getDate();
                 let colunas = [];
                 for(let i=1; i<=diasNoMes; i++) {
                     const dObj = new Date(2026, m-1, i);
-                    if(dObj.getDay() == t.dia) colunas.push({ dia: i, iso: dObj.toISOString().split('T')[0] });
+                    if(dObj.getDay() == t.dia) colunas.push({ dia: i });
                 }
+                
                 let h = `<table><thead><tr><th class="sticky-col">ALUNO</th>${colunas.map(c=>`<th>${c.dia}</th>`).join('')}</tr></thead><tbody>`;
                 t.alunos.forEach((aln, idx) => {
                     h += `<tr><td class="sticky-col">${aln}</td>`;
@@ -341,44 +450,106 @@
                 });
                 document.getElementById(tid).innerHTML = h + "</tbody></table>";
             },
+
             renderNotes(tid, t, isP) {
-                let h = `<table><thead><tr><th>ALUNO</th><th>NOTA</th></tr></thead><tbody>`;
+                let h = `<table><thead><tr><th>ESTUDANTE</th><th>NOTA</th></tr></thead><tbody>`;
                 t.alunos.forEach((aln, i) => {
                     const v = DB.data.logs[`n_${t.id}_${i}`] || '';
-                    h += `<tr><td>${aln}</td><td><input id="ni_${i}" value="${v}" style="width:60px"></td></tr>`;
+                    h += `<tr><td>${aln}</td><td><input id="ni_${i}" value="${v}" style="width:60px; text-align:center"></td></tr>`;
                 });
                 document.getElementById(tid).innerHTML = h + "</tbody></table>";
             },
+
             setF(k, isF) { DB.data.logs[k] = isF ? 'P' : 'F'; App.loadWork(); },
-            saveNotas() { session.active.alunos.forEach((_, i) => DB.data.logs[`n_${session.active.id}_${i}`] = document.getElementById(`ni_${i}`).value); alert("Ok!"); },
-            savePlano() { DB.data.logs[`p_${session.active.id}_${document.getElementById('sel-mes').value}`] = document.getElementById('plano-txt').value; alert("Ok!"); }
+            saveNotas() { 
+                session.active.alunos.forEach((_, i) => DB.data.logs[`n_${session.active.id}_${i}`] = document.getElementById(`ni_${i}`).value); 
+                alert("Notas registradas temporariamente."); 
+            },
+            savePlano() { 
+                DB.data.logs[`p_${session.active.id}_${document.getElementById('sel-mes').value}`] = document.getElementById('plano-txt').value; 
+                alert("Plano salvo."); 
+            }
         };
 
+        // --- INTERFACE DE USUÁRIO ---
         const UI = {
-            nav(id) { document.querySelectorAll('section').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); },
+            nav(id) { 
+                document.querySelectorAll('section').forEach(s=>s.classList.add('hidden')); 
+                document.getElementById(id).classList.remove('hidden'); 
+            },
             logout() { location.reload(); },
-            resetTForm() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-cancel').classList.add('hidden'); },
-            resetPForm() { document.getElementById('edit-p-id').value=''; document.getElementById('p-nome').value=''; document.getElementById('p-cancel').classList.add('hidden'); },
+            resetTForm() {
+                document.getElementById('edit-t-id').value='';
+                document.getElementById('t-nome').value='';
+                document.getElementById('t-alunos').value='';
+                document.getElementById('t-cancel').classList.add('hidden');
+                document.getElementById('t-form-title').innerText="📦 Gerenciar Eletiva";
+            },
+            resetPForm() {
+                document.getElementById('edit-p-id').value='';
+                document.getElementById('p-nome').value='';
+                document.getElementById('p-user').value='';
+                document.getElementById('p-pass').value='';
+                document.querySelectorAll('.t-check').forEach(c=>c.checked=false);
+                document.getElementById('p-cancel').classList.add('hidden');
+                document.getElementById('p-form-title').innerText="👤 Gerenciar Professor";
+            },
             renderCoord() {
                 const dias = ["","SEG","TER","QUA","QUI","SEX"];
-                document.getElementById('list-turmas').innerHTML = DB.data.turmas.map(t=>`<div class="eletiva-item"><span>${t.nome}</span><div><button onclick="App.editTurma(${t.id})">✏️</button><button onclick="DB.delete('turmas','id',${t.id})">🗑️</button></div></div>`).join('');
-                document.getElementById('list-profs').innerHTML = DB.data.profs.map(p=>`<div class="eletiva-item"><span>${p.nome}</span><div><button onclick="App.editProf(${p.id})">✏️</button><button onclick="DB.delete('professores','id',${p.id})">🗑️</button></div></div>`).join('');
-                document.getElementById('p-turmas-check').innerHTML = DB.data.turmas.map(t=>`<div><input type="checkbox" class="t-check" value="${t.id}"> ${t.nome}</div>`).join('');
-                document.getElementById('list-feriados').innerHTML = DB.data.feriados.map(f=>`<div>${f.data} - <button onclick="DB.delete('feriados','data','${f.data}')">✕</button></div>`).join('');
+                
+                document.getElementById('list-turmas').innerHTML = DB.data.turmas.map(t=>`
+                    <div class="eletiva-item">
+                        <span><b>${t.nome}</b> (${dias[t.dia] || '?'})</span>
+                        <div>
+                            <button class="btn btn-outline" style="padding:5px" onclick="App.editTurma(${t.id})">✏️</button>
+                            <button class="btn btn-danger" style="padding:5px" onclick="DB.delete('turmas','id',${t.id})">🗑️</button>
+                        </div>
+                    </div>`).join('');
+
+                document.getElementById('list-profs').innerHTML = DB.data.profs.map(p=>`
+                    <div class="eletiva-item">
+                        <span>${p.nome}</span>
+                        <div>
+                            <button class="btn btn-outline" style="padding:5px" onclick="App.editProf(${p.id})">✏️</button>
+                            <button class="btn btn-danger" style="padding:5px" onclick="DB.delete('professores','id',${p.id})">🗑️</button>
+                        </div>
+                    </div>`).join('');
+
+                document.getElementById('p-turmas-check').innerHTML = DB.data.turmas.map(t=>`
+                    <div><input type="checkbox" class="t-check" value="${t.id}"> ${t.nome}</div>`).join('');
+
+                document.getElementById('list-feriados').innerHTML = DB.data.feriados.map(f=>`
+                    <div style="font-size:0.8rem; margin-bottom:5px">
+                        ${f.data} - ${f.desc} <button onclick="DB.delete('feriados','data','${f.data}')" style="color:red; border:none; cursor:pointer">✕</button>
+                    </div>`).join('');
             },
             renderProf() {
                 document.getElementById('prof-turmas').innerHTML = session.user.turmas.map(tid=>{
                     const t = DB.data.turmas.find(x=>x.id==tid);
-                    return t ? `<div class="eletiva-item" onclick="UI.openTurma(${t.id})"><b>${t.nome}</b> ➡️</div>` : '';
+                    return t ? `<div class="eletiva-item" onclick="UI.openTurma(${t.id})"><b>${t.nome}</b> <span>➡️</span></div>` : '';
                 }).join('');
             },
-            openTurma(id) { session.active = DB.data.turmas.find(x=>x.id==id); document.getElementById('active-title').innerText = session.active.nome; document.getElementById('prof-home').classList.add('hidden'); document.getElementById('prof-workspace').classList.remove('hidden'); App.loadWork(); },
-            closeTurma() { document.getElementById('prof-home').classList.remove('hidden'); document.getElementById('prof-workspace').classList.add('hidden'); },
-            tab(b, id) { document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden')); b.classList.add('active'); document.getElementById(id).classList.remove('hidden'); },
+            openTurma(id) { 
+                session.active = DB.data.turmas.find(x=>x.id==id); 
+                document.getElementById('active-title').innerText = session.active.nome; 
+                document.getElementById('prof-home').classList.add('hidden'); 
+                document.getElementById('prof-workspace').classList.remove('hidden'); 
+                App.loadWork(); 
+            },
+            closeTurma() { 
+                document.getElementById('prof-home').classList.remove('hidden'); 
+                document.getElementById('prof-workspace').classList.add('hidden'); 
+            },
+            tab(b, id) { 
+                document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); 
+                document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden')); 
+                b.classList.add('active'); 
+                document.getElementById(id).classList.remove('hidden'); 
+            },
             genPDF() { window.print(); }
         };
 
-        let session = { user: null, active: null };
+        // Iniciar Sistema
         window.onload = () => DB.load();
     </script>
 </body>
