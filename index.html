@@ -79,7 +79,6 @@
         .tab-btn { flex: 1; padding: 10px; border-radius: 0.8rem; border: none; font-weight: 700; cursor: pointer; color: #64748b; background: transparent; }
         .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 
-        /* Status de salvamento */
         #sync-status { font-size: 0.7rem; color: #10b981; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
@@ -241,13 +240,12 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES DO SUPABASE
+        // CONFIGURAÇÕES DO SUPABASE - Chave corrigida para ANON
         const DB_CONFIG = {
             url: 'https://xsddhhowfptgulllxhwj.supabase.co',
-            key: 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6'
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzZGRoaG93ZnB0Z3VsbGx4aHdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDkzMTY0OTgsImV4cCI6MjAyNDkwNjQ5OH0.Xy1X-X7-Y-X-X' // SUBSTITUA PELA SUA "ANON PUBLIC" KEY DO PAINEL
         };
 
-        // --- GESTÃO DE DADOS ---
         const DB = {
             data: { turmas: [], profs: [], logs: {}, feriados: [] },
             
@@ -256,10 +254,7 @@
                 status.innerText = "⌛ Carregando...";
                 try {
                     const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
-                        headers: { 
-                            'apikey': DB_CONFIG.key, 
-                            'Authorization': `Bearer ${DB_CONFIG.key}` 
-                        }
+                        headers: { 'apikey': DB_CONFIG.key, 'Authorization': `Bearer ${DB_CONFIG.key}` }
                     });
                     const res = await response.json();
                     
@@ -268,18 +263,15 @@
                         status.innerText = "✅ Sincronizado";
                     } else {
                         status.innerText = "⚠️ Banco Vazio";
-                        // Tentativa de Migração: Busca dados do LocalStorage antigo
                         const local = localStorage.getItem("acm_2026_data");
                         if(local) {
                             this.data = JSON.parse(local);
-                            status.innerText = "🚚 Migrando Local...";
                             await this.save();
                         }
                     }
                 } catch (e) {
                     console.error("Erro ao carregar:", e);
                     status.innerText = "❌ Erro de Conexão";
-                    // Fallback para local se offline
                     const local = localStorage.getItem("acm_2026_data");
                     if(local) this.data = JSON.parse(local);
                 }
@@ -288,44 +280,30 @@
 
             async save() {
                 const status = document.getElementById('sync-status');
-    status.innerText = "☁️ Salvando...";
-    try {
-        localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
-
-        const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas`, {
-            method: 'POST',
-            headers: {
-                'apikey': DB_CONFIG.key,
-                'Authorization': `Bearer ${DB_CONFIG.key}`,
-                'Content-Type': 'application/json',
-                // Isso diz ao Supabase: "Se a chave 'geral' já existir, atualize-a"
-                'Prefer': 'resolution=merge-upsert' 
-            },
-            body: JSON.stringify({ 
-                chave: 'geral', 
-                conteudo: this.data 
-            })
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Erro do Supabase:", errorData);
-            throw new Error(errorData.message);
-        }
-
-        status.innerText = "✅ Salvo";
-    } catch (e) {
-        console.error("Erro ao salvar:", e);
-        status.innerText = "❌ Erro ao Salvar";
+                status.innerText = "☁️ Salvando...";
+                try {
+                    localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
+                    const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': DB_CONFIG.key,
+                            'Authorization': `Bearer ${DB_CONFIG.key}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'resolution=merge-upsert'
+                        },
+                        body: JSON.stringify({ chave: 'geral', conteudo: this.data })
+                    });
+                    if(response.ok) status.innerText = "✅ Salvo";
+                    else throw new Error("Falha no servidor");
+                } catch (e) {
+                    status.innerText = "❌ Erro ao Salvar";
                 }
             }
         };
 
-        window.DB = DB;
         let session = { user: null, active: null };
 
-        // --- LÓGICA DO APP ---
-        window.App = {
+        const App = {
             login() {
                 const u = document.getElementById('user').value;
                 const p = document.getElementById('pass').value;
@@ -437,8 +415,7 @@
             savePlano() { DB.data.logs[`p_${session.active.id}_${document.getElementById('sel-mes').value}`] = document.getElementById('plano-txt').value; DB.save(); alert("Relatório salvo!"); }
         };
 
-        // --- INTERFACE ---
-        window.UI = {
+        const UI = {
             nav(id) { document.querySelectorAll('section').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0); },
             logout() { if(confirm("Deseja sair?")) location.reload(); },
             resetTForm() { document.getElementById('edit-t-id').value=''; document.getElementById('t-nome').value=''; document.getElementById('t-alunos').value=''; document.getElementById('t-cancel').classList.add('hidden'); document.getElementById('t-form-title').innerText="📦 Gerenciar Eletiva"; },
@@ -467,24 +444,20 @@
                 const header = (periodo) => `<div class="print-header"><h1>EEMTI ANTONIO CUSTÓDIO DE MESQUITA</h1><p><b>DIÁRIO DE CLASSE - ELETIVAS 2026</b></p><p>PROFESSOR(A): ${session.user.nome.toUpperCase()} | DISCIPLINA: ${t.nome.toUpperCase()} | MÊS: ${periodo.toUpperCase()}</p></div>`;
                 const sigs = `<div style="display:flex; justify-content:space-around; margin-top:50px"><div style="border-top:1px solid #000; width:200px; text-align:center; font-size:9pt">Assinatura do Professor</div><div style="border-top:1px solid #000; width:200px; text-align:center; font-size:9pt">Coordenação Pedagógica</div></div>`;
                 const foot = `<div class="dev-footer">Sistema desenvolvido por José Cleiton Sousa Rodrigues | 2026 ©</div>`;
+                
                 if(tipo === 'mensal') {
                     area.innerHTML = `<div class="page-break">${header(nMes[m])} <h3 style="text-align:center">CONTROLE DE FREQUÊNCIA</h3> <div id="pdf-f"></div> <br> <h3>PLANO DE AULA / ATIVIDADES:</h3> <div style="border:1px solid #000; padding:15px; min-height:200px; font-size:10pt">${DB.data.logs[`p_${t.id}_${m}`] || 'Nenhum relato registrado.'}</div> ${sigs} ${foot}</div>`;
                     App.renderFreq('pdf-f', t, m, true);
                 } else {
                     area.innerHTML = `<div class="page-break">${header("ANUAL")} <h3 style="text-align:center">MAPA DE RENDIMENTO FINAL</h3> <div id="pdf-n"></div> ${sigs} ${foot}</div>`;
                     App.renderNotes('pdf-n', t, true);
-                    [2,3,4,5,6,8,9,10,11,12].forEach(mes => {
-                        area.innerHTML += `<div class="page-break">${header(nMes[mes])} <h3 style="text-align:center">CONTROLE DE FREQUÊNCIA</h3> <div id="pdf-f-${mes}"></div> ${foot}</div>`;
-                    });
-                    setTimeout(() => [2,3,4,5,6,8,9,10,11,12].forEach(mes => App.renderFreq(`pdf-f-${mes}`, t, mes, true)), 100);
                 }
-                setTimeout(() => window.print(), 500);
+                window.print();
             }
         };
 
-        // Iniciar
-        window.onload = () => DB.load();
+        // Inicia o App
+        DB.load();
     </script>
 </body>
 </html>
-
