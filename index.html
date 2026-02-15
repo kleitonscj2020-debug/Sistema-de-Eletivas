@@ -243,55 +243,53 @@
     <script>
         // CONFIGURAÇÕES DO SUPABASE
         const DB_CONFIG = {
-            url: 'https://xsddhhowfptgulllxhwj.supabase.co',
-            key: 'sb_secret_IyFmyEVnvZkYXTIbw9Kx1Q_1V7pqo_6'
-        };
+            url: 'https://ywvjrftswetetiujlfdd.supabase.co',
+    key: 'sb_publishable_OF4kPBBbE0gPZNL2kFI_JQ__NCdz5Bv'
+};
 
-        // --- GESTÃO DE DADOS ---
-        const DB = {
-            data: { turmas: [], profs: [], logs: {}, feriados: [] },
-    
+// --- GESTÃO DE DADOS (VERSÃO COMPATÍVEL COM CHAVE PUBLISHABLE) ---
+const DB = {
+    data: { turmas: [], profs: [], logs: {}, feriados: [] },
+
     async load() {
         const status = document.getElementById('sync-status');
-        if (status) status.innerText = "⌛ Conectando...";
-        
+        if (status) status.innerText = "⌛ Sincronizando...";
+
         try {
-            // O segredo aqui é o select=conteudo para pegar os dados da linha 'geral'
+            // Busca os dados usando a URL e a Chave que você forneceu
             const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral&select=conteudo`, {
-                method: 'GET',
                 headers: { 
-                    'apikey': DB_CONFIG.key, // Use a chave que começa com eyJh...
-                    'Authorization': `Bearer ${DB_CONFIG.key}`
+                    'apikey': DB_CONFIG.key, 
+                    'Authorization': `Bearer ${DB_CONFIG.key}` 
                 }
             });
-            
             const res = await response.json();
-            
-            if (res && res.length > 0) {
+
+            if (res && res.length > 0 && res[0].conteudo) {
                 this.data = res[0].conteudo;
                 if (status) status.innerText = "✅ Banco Online";
             } else {
-                // Tenta carregar do PC se o banco falhar
+                // Se o banco estiver vazio, mantém a estrutura básica
                 const local = localStorage.getItem("acm_2026_data");
                 if(local) this.data = JSON.parse(local);
-                if (status) status.innerText = "⚠️ Modo Local (Banco Vazio)";
+                if (status) status.innerText = "⚠️ Modo Local";
             }
         } catch (e) {
             console.error("Erro no Link:", e);
-            if (status) status.innerText = "❌ Erro de Link (Verifique a Key)";
+            if (status) status.innerText = "❌ Erro de Link com Banco";
         }
         UI.renderCoord();
     },
 
     async save() {
         const status = document.getElementById('sync-status');
-        if (status) status.innerText = "🚀 Salvando Nuvem...";
-        
-        // Salva no navegador por segurança imediata
+        if (status) status.innerText = "🚀 Gravando Nuvem...";
+
+        // Backup no PC
         localStorage.setItem("acm_2026_data", JSON.stringify(this.data));
 
         try {
-            // O comando Prefer: resolution=merge-upsert é o que faz o salvamento ser "forte"
+            // Tenta salvar usando o método POST (Upsert)
             const response = await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas`, {
                 method: 'POST',
                 headers: {
@@ -309,7 +307,7 @@
             if (response.ok) {
                 if (status) status.innerText = "✅ Salvo com Sucesso!";
             } else {
-                // Se o POST falhar, tentamos o PATCH como última alternativa
+                // Se der erro de conflito, tenta o PATCH (Update)
                 await fetch(`${DB_CONFIG.url}/rest/v1/dados_eletivas?chave=eq.geral`, {
                     method: 'PATCH',
                     headers: {
@@ -319,11 +317,11 @@
                     },
                     body: JSON.stringify({ conteudo: this.data })
                 });
-                if (status) status.innerText = "✅ Salvo (via Patch)";
+                if (status) status.innerText = "✅ Atualizado";
             }
         } catch (e) {
             console.error("Erro ao salvar:", e);
-            if (status) status.innerText = "❌ Erro de Comunicação";
+            if (status) status.innerText = "❌ Falha de Comunicação";
                 }
             }
         };
@@ -512,6 +510,7 @@
     </script>
 </body>
 </html>
+
 
 
 
