@@ -313,11 +313,41 @@
             login() {
                 const u = document.getElementById('user').value;
                 const p = document.getElementById('pass').value;
-                if(u==='coord' && p==='033') { UI.nav('view-coord'); UI.renderCoord(); }
-                else {
-                    const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
-                    if(prof) { session.user = prof; document.getElementById('prof-name').innerText = prof.nome; UI.nav('view-prof'); UI.renderProf(); }
-                    else alert("Credenciais incorretas.");
+                login: async function() {
+    const u = document.getElementById('user').value.trim();
+    const p = document.getElementById('pass').value.trim();
+    const status = document.getElementById('sync-status');
+
+    if(!u || !p) return alert("Preencha usuário e senha!");
+
+    status.innerText = "⌛ Verificando credenciais...";
+
+    try {
+        // Filtra o professor pelo user e pass no DB.data (já carregado do Supabase)
+        await DB.load(); // garante que os dados estão atualizados
+        const prof = DB.data.profs.find(x => x.user === u && x.pass === p);
+
+        if(prof) {
+            session.user = prof;
+            document.getElementById('prof-name').innerText = prof.nome;
+            UI.nav('view-prof');
+            UI.renderProf();
+            status.innerText = "✅ Login realizado!";
+        } else if(u === "coord") {
+            // Login do coordenador
+            if(p === "033") { // você pode mudar a senha real depois
+                UI.nav('view-coord');
+                UI.renderCoord();
+                status.innerText = "✅ Login do coordenador!";
+            } else alert("Senha incorreta.");
+        } else {
+            alert("Credenciais incorretas.");
+            status.innerText = "❌ Falha no login";
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao conectar ao Supabase.");
+        status.innerText = "❌ Erro no login";
                 }
             },
 
@@ -471,5 +501,6 @@
     </script>
 </body>
 </html>
+
 
 
